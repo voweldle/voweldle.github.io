@@ -1,17 +1,29 @@
 {
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "deploy": "next build && touch out/.nojekyll && git add out/ && git commit -m \"Deploy\" && git subtree push --prefix out origin gh-pages"
-  },
-  "dependencies": {
-    "@types/node": "^18.11.5",
-    "@types/react-dom": "^18.0.7",
-    "@types/react": "^18.0.23",
-    "next": "latest",
-    "react-dom": "^18.2.0",
-    "react": "^18.2.0",
-    "typescript": "^4.8.4"
-  }
+    "name": "voweldle.github.io",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "export": "next build && next export",
+        "deploy": "gh-pages -d out",
+        "predeploy": "npm run export"
+    },
+    "homepage": "https://voweldle.github.io/",
+    "dependencies": {
+        "@types/node": "18.15.11",
+        "@types/react": "18.0.31",
+        "@types/react-dom": "18.0.11",
+        "eslint": "8.37.0",
+        "eslint-config-next": "13.2.4",
+        "next": "13.2.4",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "typescript": "5.0.3"
+    },
+    "devDependencies": {
+        "gh-pages": "^5.0.0"
+    }
 }

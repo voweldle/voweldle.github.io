@@ -1,14 +1,11 @@
-// @ts-check
-
-/**
- * @type {import('next').NextConfig}
- **/
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  reactStrictMode: true,
   basePath: '',
-  experimental: {
-    appDir: true,
-  },
+  assetPrefix: '',
+  images: {
+    unoptimized: true
+  }
 }
 
 module.exports = nextConfig
