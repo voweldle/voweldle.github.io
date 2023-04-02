@@ -11,7 +11,7 @@
         "deploy": "gh-pages -d out",
         "predeploy": "npm run export"
     },
-    "homepage": "https://voweldle.github.io/",
+    "homepage": "https://voweldle.github.io",
     "dependencies": {
         "@types/node": "18.15.11",
         "@types/react": "18.0.31",
