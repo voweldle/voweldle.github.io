@@ -37,6 +37,24 @@
     width: 30px;
     height: 30px;
     margin-right: 1px;
+    color: "white";
+    background-color: "grey";
+}
+
+.box.green {
+    background-color: lightgreen;
+}
+
+.box.yellow {
+    background-color: yellow;
+}
+
+.box.red {
+    background-color: red;
+}
+
+.box.black {
+    background-color: black;
 }
 
 .row {
