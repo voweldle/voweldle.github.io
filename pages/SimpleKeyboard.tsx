@@ -4,7 +4,7 @@ import Keyboard from "react-simple-keyboard";
 
 import "react-simple-keyboard/build/css/index.css";
 
-const INITIAL_WORD = "DEVELOPMENT".toUpperCase();
+const INITIAL_WORD = "COLOR".toUpperCase();
 
 export default function SimpleKeyboard() {
     const keyboard = useRef<any | null>(null);
@@ -18,11 +18,16 @@ export default function SimpleKeyboard() {
     );
     const [attempts, setAttempts] = useState(0);
 
-    // write a function checkWord that returns true if the word is valid
-    // and false if the word is invalid
-    const checkWord = (word: string) => {
-        return true;
-    };
+    const checkWord = async (word: string) => {
+        const response = await fetch('/words.txt');
+        const text = await response.text();
+        const words = text.split('\n');
+        const lowerCaseWords = words.map(wordi => wordi.toLowerCase());
+
+        //console.log(lowerCaseWords.length)
+        //console.log(lowerCaseWords.includes(word.toLowerCase()));
+        return lowerCaseWords.includes(word.toLowerCase());
+    }
 
     const onKeyPress = (button: string) => {
         console.log("Button pressed", button);
@@ -56,7 +61,7 @@ export default function SimpleKeyboard() {
         keyboard.current.clearInput();
     };
 
-    const handleKeyPress = (key: string) => {
+    const handleKeyPress = async (key: string) => {
         if (key === "Backspace") {
             setTypedLetters(typedLetters.slice(0, -1));
         } else if (key === "Enter") {
@@ -96,7 +101,7 @@ export default function SimpleKeyboard() {
                         }
                     }
                 );
-                if (isWordValid) {
+                if (await isWordValid) {
                     setRows([...rows, newRow]);
                     setTypedLetters([]);
                     if (newRow.every((item) => item.color === "green")) {
