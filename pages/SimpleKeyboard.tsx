@@ -19,7 +19,7 @@ export default function SimpleKeyboard() {
     const [attempts, setAttempts] = useState(0);
 
     const checkWord = async (word: string) => {
-        const response = await fetch('/words.txt');
+        const response = await fetch('/cleaned_word_list.txt');
         const text = await response.text();
         const words = text.split('\n');
         const lowerCaseWords = words.map(wordi => wordi.toLowerCase());
