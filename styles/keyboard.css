@@ -27,6 +27,8 @@
     width: 100%;
     max-width: 750px;
     margin-bottom: 5px;
+    justify-content: center;
+    padding-bottom: 20px;
 }
 
 .box {
@@ -34,27 +36,32 @@
     justify-content: center;
     align-items: center;
     border: 1px solid #ccc;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     margin-right: 1px;
-    color: "white";
-    background-color: "grey";
+    color: black;
+    background-color: white;
+    align-self: center;
 }
 
 .box.green {
-    background-color: lightgreen;
+    background-color: rgb(90, 161, 90);
+    color: white;
 }
 
 .box.yellow {
-    background-color: yellow;
+    background-color: rgba(230, 180, 17, 0.8);
+    color: white;
 }
 
 .box.red {
-    background-color: red;
+    background-color: rgba(221, 48, 65, 0.833);
+    color: white;
 }
 
 .box.black {
     background-color: black;
+    color: white;
 }
 
 .row {
@@ -62,6 +69,8 @@
     flex-wrap: wrap;
     width: 100%;
     margin-bottom: 5px;
+    align-items: center;
+    justify-content: center;
 }
 
 .dialog {
