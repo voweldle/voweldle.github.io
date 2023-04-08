@@ -4,7 +4,7 @@ import Keyboard from "react-simple-keyboard";
 
 import "react-simple-keyboard/build/css/index.css";
 
-const INITIAL_WORD = "COLOR".toUpperCase();
+const INITIAL_WORD = "Color".toUpperCase();
 
 export default function SimpleKeyboard() {
     const keyboard = useRef<any | null>(null);
@@ -77,21 +77,32 @@ export default function SimpleKeyboard() {
                             // INITIAL_WORD
                             const numOccurrences = INITIAL_WORD.split("").filter((item) => item === letter).length;
                             // count the number of times letter appears in
-                            // typedWord so far to left of and including index
+                            // typedWord so far to left index
                             const numTypedOccurrences = typedLetters
-                                .slice(0, index + 1)
+                                .slice(0, index)
                                 .filter((item) => item === letter).length;
                             // find number of places where letter appears in
                             // INITIAL_WORD and typedWord in the same location
                             const numGreenOccurrences = INITIAL_WORD.split("").filter((item, index) => item === letter && item === typedWord[index]).length;
+                            // number of green occurences to left of current index
+                            const numGreenOccurrencesToLeft = INITIAL_WORD.split("").slice(0, index).filter((item, index) => item === letter && item === typedWord[index]).length;
 
-                            console.log("numOccurrences", numOccurrences);
-                            console.log("numTypedOccurrences", numTypedOccurrences);
-                            console.log("numGreenOccurrences", numGreenOccurrences);
+                            // console.log("numOccurrences", numOccurrences);
+                            // console.log("numTypedOccurrences", numTypedOccurrences);
+                            // console.log("numGreenOccurrences", numGreenOccurrences);
+
                             // now the green occurences will always get the green color
-                            // for the rest, we give yellow to as many as in numOccurrences - numGreenOccurrences
-                            // and red to the rest
-                            if (numTypedOccurrences <= numOccurrences - numGreenOccurrences) {
+
+                            // max number of yellow occurences 
+                            // is numOccurrences - numGreenOccurrences
+                            const maxNumYellowOccurrences = numOccurrences - numGreenOccurrences;
+
+                            // calculate number of yellow occurences to left of current index
+                            const numYellowOccurrencesToLeft = numTypedOccurrences - numGreenOccurrencesToLeft;
+
+                            // if number of yellow occurences to left of current index
+                            // is less than max number of yellow occurences, we give yellow to current index
+                            if (numYellowOccurrencesToLeft < maxNumYellowOccurrences) {
                                 return { letter, color: "yellow" };
                             } else {
                                 return { letter, color: "red" };
