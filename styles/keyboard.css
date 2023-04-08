@@ -73,21 +73,40 @@
     justify-content: center;
 }
 
-.dialog {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.dialog-box {
+    position: relative;
+    margin: 10px 0;
+    padding: 10px;
+    border: 2px solid #333;
+    background-color: #eee;
+    color: #333;
+    text-align: center;
+    border-radius: 5px;
 }
 
-.dialog-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
+.win-dialog-box {
+    display: flex;
+    /* add flexbox */
+    justify-content: center;
+    /* center horizontally */
+    align-items: center;
+    /* center vertically */
+    position: relative;
+    border: 2px solid #333;
+    background-color: #eee;
+    color: #333;
     text-align: center;
+    border-radius: 5px;
+    min-height: 100px;
+    min-width: 250px;
+}
+
+.close-button {
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    font-size: 1.0rem;
+    background: none;
+    border: none;
+    cursor: pointer;
 }

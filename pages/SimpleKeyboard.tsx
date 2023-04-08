@@ -10,7 +10,9 @@ export default function SimpleKeyboard() {
     const keyboard = useRef<any | null>(null);
     const numLetters = INITIAL_WORD.length; // Set the number of letters based on the initial word length
 
-    const [showDialog, setShowDialog] = useState(false);
+    const [status, setStatus] = useState("IN_PROGRESS");
+    const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
+    const [showWinDialog, setShowWinDialog] = useState(false);
 
     const [typedLetters, setTypedLetters] = useState<string[]>([]);
     const [rows, setRows] = useState<Array<{ letter: string; color: string }[]>>(
@@ -53,15 +55,30 @@ export default function SimpleKeyboard() {
         "{backspaceSymbol}": "⌫"
     };
 
-    const closeDialog = () => {
-        setShowDialog(false);
-        setTypedLetters([]);
-        setAttempts(0);
-        setRows([]);
-        keyboard.current.clearInput();
+    function AutoDisappearingDialogBox({ message, timeout = 3000 }: { message: string, timeout?: number }) {
+        useEffect(() => {
+            const timer = setTimeout(() => {
+                setShowTooFewLettersDialog(false);
+            }, timeout);
+
+            return () => clearTimeout(timer);
+        }, [timeout]);
+
+        return showTooFewLettersDialog ? (
+            <div className="dialog-box">
+                <div className="message">{message}</div>
+            </div>
+        ) : null;
+    }
+
+    const handleCloseWinDialog = () => {
+        setShowWinDialog(false); // hide win dialog box
     };
 
     const handleKeyPress = async (key: string) => {
+        if (status === "WIN") {
+            return;
+        }
         if (key === "Backspace") {
             setTypedLetters(typedLetters.slice(0, -1));
         } else if (key === "Enter") {
@@ -112,21 +129,20 @@ export default function SimpleKeyboard() {
                         }
                     }
                 );
+                setAttempts(attempts + 1);
                 if (await isWordValid) {
                     setRows([...rows, newRow]);
                     setTypedLetters([]);
                     if (newRow.every((item) => item.color === "green")) {
-                        setShowDialog(true);
-                    } else {
-                        setAttempts(attempts + 1);
+                        setStatus("WIN");
+                        setShowWinDialog(true);
                     }
                 } else {
                     setRows([...rows, newRow.map((item) => ({ ...item, color: "black" }))]);
                     setTypedLetters([]);
-                    setAttempts(attempts + 1);
                 }
             } else {
-                setShowDialog(true);
+                setShowTooFewLettersDialog(true);
             }
         } else {
             if (typedLetters.length < numLetters) {
@@ -180,13 +196,13 @@ export default function SimpleKeyboard() {
                             {letter}
                         </div>
                     ))}
-                    {Array(numLetters - typedLetters.length)
-                        .fill(null)
-                        .map((_, index) => (
-                            <div key={index + typedLetters.length} className="box">
-                                {" "}
-                            </div>
-                        ))}
+                    {status === "IN_PROGRESS" ? (
+                        <>
+                            {Array(numLetters - typedLetters.length).fill(null).map((_, index) => (
+                                <div key={index + typedLetters.length} className="box">{" "}</div>
+                            ))}
+                        </>
+                    ) : null}
                 </div>
             </div>
 
@@ -198,47 +214,17 @@ export default function SimpleKeyboard() {
                     onKeyPress={onKeyPress}
                 />
             </div>
-            {showDialog && (
-                <div className="dialog">
-                    {rows.length > 0 && (
-                        <div className="dialog-content">
-                            {rows[rows.length - 1].map((item, index) => (
-                                <div
-                                    key={index}
-                                    className={`dialog-box ${item.color}`}
-                                >
-                                    {item.letter === " " ? "\u00A0" : item.letter}
-                                </div>
-                            ))}
-                            {!checkWord(typedLetters.join("")) && (
-                                <p>
-                                    {typedLetters.join("")} is not a valid word.
-                                </p>
-                            )}
-                            {rows[rows.length - 1].every(
-                                (item) => item.color === "green"
-                            ) && (
-                                    <p>
-                                        Solved in {attempts} attempt(s).
-                                    </p>
-                                )}
-                            <button onClick={closeDialog}>Close</button>
-                        </div>
-                    )}
-                    {rows.length === 0 && (
-                        <div className="dialog-content">
-                            <p>Type a word with {numLetters} letters and press Enter to start.</p>
-                            <button onClick={closeDialog}>Close</button>
-                        </div>
-                    )}
+            <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />
+
+            {showWinDialog && ( // render win dialog box if showWinDialog is true
+                <div className="win-dialog-box">
+                    <div className="message">
+                        <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
+                        <p>You win! Attempts: {attempts}</p>
+                    </div>
                 </div>
             )}
-            {(showDialog || (showDialog && rows.length === 0)) && (
-                <div className="overlay"></div>
-            )}
-            {showDialog && rows.length > 0 && rows[rows.length - 1].every((item) => item.color === "green") && (
-                <div className="overlay"></div>
-            )}
+
         </div>
     );
 }
