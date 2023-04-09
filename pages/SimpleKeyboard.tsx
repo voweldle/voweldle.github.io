@@ -4,17 +4,38 @@ import Keyboard from "react-simple-keyboard";
 
 import "react-simple-keyboard/build/css/index.css";
 
-const INITIAL_WORD = "Color".toUpperCase();
+const INITIAL_WORD = "motorist".toUpperCase();
+const numLetters = INITIAL_WORD.length; // Set the number of letters based on the initial word length
+const VOWEL_STYLE = "vowel";
+
+// function to return true if character is a vowel
+const isVowel = (char: string) => {
+    return "AEIOU".includes(char);
+};
+
+// write a function that takes a array of characters as input,
+// pushes in as many consecutive vowels from INITIAL_LETTERS as possible
+// matching up the position correctly and returns the new array
+const fillVowels = (typedLetters: string[]) => {
+    const newTypedLetters = [...typedLetters];
+    for (let i = newTypedLetters.length; i < numLetters; i++) {
+        if (isVowel(INITIAL_WORD[i])) {
+            newTypedLetters.push(INITIAL_WORD[i]);
+        } else {
+            break;
+        }
+    }
+    return newTypedLetters;
+};
 
 export default function SimpleKeyboard() {
     const keyboard = useRef<any | null>(null);
-    const numLetters = INITIAL_WORD.length; // Set the number of letters based on the initial word length
 
     const [status, setStatus] = useState("IN_PROGRESS");
     const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
     const [showWinDialog, setShowWinDialog] = useState(false);
 
-    const [typedLetters, setTypedLetters] = useState<string[]>([]);
+    const [typedLetters, setTypedLetters] = useState<string[]>(fillVowels([]));
     const [rows, setRows] = useState<Array<{ letter: string; color: string }[]>>(
         []
     );
@@ -75,78 +96,93 @@ export default function SimpleKeyboard() {
         setShowWinDialog(false); // hide win dialog box
     };
 
+
     const handleKeyPress = async (key: string) => {
         if (status === "WIN") {
             return;
         }
         if (key === "Backspace") {
+            // TODO: fix logic to handle backspace properly with vowels
+            // only remove the consonant not vowel!
             setTypedLetters(typedLetters.slice(0, -1));
         } else if (key === "Enter") {
             if (typedLetters.length === numLetters) {
                 const typedWord = typedLetters.join("");
                 const isWordValid = checkWord(typedWord); // check if the entered word is valid
-                const newRow: { letter: string; color: string }[] = typedLetters.map(
-                    (letter, index) => {
-                        if (INITIAL_WORD[index] === letter) {
+                let newRow: { letter: string; color: string }[] = [];
+
+                if (typedWord === INITIAL_WORD) {
+                    newRow = typedLetters.map(
+                        letter => {
                             return { letter, color: "green" };
-                        } else if (INITIAL_WORD.includes(letter)) {
-                            // count the number of times letter appears in 
-                            // INITIAL_WORD
-                            const numOccurrences = INITIAL_WORD.split("").filter((item) => item === letter).length;
-                            // count the number of times letter appears in
-                            // typedWord so far to left index
-                            const numTypedOccurrences = typedLetters
-                                .slice(0, index)
-                                .filter((item) => item === letter).length;
-                            // find number of places where letter appears in
-                            // INITIAL_WORD and typedWord in the same location
-                            const numGreenOccurrences = INITIAL_WORD.split("").filter((item, index) => item === letter && item === typedWord[index]).length;
-                            // number of green occurences to left of current index
-                            const numGreenOccurrencesToLeft = INITIAL_WORD.split("").slice(0, index).filter((item, index) => item === letter && item === typedWord[index]).length;
+                        }
+                    );
+                } else {
+                    newRow = typedLetters.map(
+                        (letter, index) => {
+                            if ("AEIOU".includes(INITIAL_WORD[index])) {
+                                return { letter: INITIAL_WORD[index], color: VOWEL_STYLE };
+                            } else if (INITIAL_WORD[index] === letter) {
+                                return { letter, color: "green" };
+                            } else if (INITIAL_WORD.includes(letter)) {
+                                // count the number of times letter appears in 
+                                // INITIAL_WORD
+                                const numOccurrences = INITIAL_WORD.split("").filter((item) => item === letter).length;
+                                // count the number of times letter appears in
+                                // typedWord so far to left index
+                                const numTypedOccurrences = typedLetters
+                                    .slice(0, index)
+                                    .filter((item) => item === letter).length;
+                                // find number of places where letter appears in
+                                // INITIAL_WORD and typedWord in the same location
+                                const numGreenOccurrences = INITIAL_WORD.split("").filter((item, index) => item === letter && item === typedWord[index]).length;
+                                // number of green occurences to left of current index
+                                const numGreenOccurrencesToLeft = INITIAL_WORD.split("").slice(0, index).filter((item, index) => item === letter && item === typedWord[index]).length;
 
-                            // console.log("numOccurrences", numOccurrences);
-                            // console.log("numTypedOccurrences", numTypedOccurrences);
-                            // console.log("numGreenOccurrences", numGreenOccurrences);
+                                // console.log("numOccurrences", numOccurrences);
+                                // console.log("numTypedOccurrences", numTypedOccurrences);
+                                // console.log("numGreenOccurrences", numGreenOccurrences);
 
-                            // now the green occurences will always get the green color
+                                // now the green occurences will always get the green color
 
-                            // max number of yellow occurences 
-                            // is numOccurrences - numGreenOccurrences
-                            const maxNumYellowOccurrences = numOccurrences - numGreenOccurrences;
+                                // max number of yellow occurences 
+                                // is numOccurrences - numGreenOccurrences
+                                const maxNumYellowOccurrences = numOccurrences - numGreenOccurrences;
 
-                            // calculate number of yellow occurences to left of current index
-                            const numYellowOccurrencesToLeft = numTypedOccurrences - numGreenOccurrencesToLeft;
+                                // calculate number of yellow occurences to left of current index
+                                const numYellowOccurrencesToLeft = numTypedOccurrences - numGreenOccurrencesToLeft;
 
-                            // if number of yellow occurences to left of current index
-                            // is less than max number of yellow occurences, we give yellow to current index
-                            if (numYellowOccurrencesToLeft < maxNumYellowOccurrences) {
-                                return { letter, color: "yellow" };
+                                // if number of yellow occurences to left of current index
+                                // is less than max number of yellow occurences, we give yellow to current index
+                                if (numYellowOccurrencesToLeft < maxNumYellowOccurrences) {
+                                    return { letter, color: "yellow" };
+                                } else {
+                                    return { letter, color: "red" };
+                                }
                             } else {
                                 return { letter, color: "red" };
                             }
-                        } else {
-                            return { letter, color: "red" };
                         }
-                    }
-                );
+                    );
+                }
                 setAttempts(attempts + 1);
                 if (await isWordValid) {
                     setRows([...rows, newRow]);
-                    setTypedLetters([]);
+                    setTypedLetters(fillVowels([]));
                     if (newRow.every((item) => item.color === "green")) {
                         setStatus("WIN");
                         setShowWinDialog(true);
                     }
                 } else {
                     setRows([...rows, newRow.map((item) => ({ ...item, color: "black" }))]);
-                    setTypedLetters([]);
+                    setTypedLetters(fillVowels([]));
                 }
             } else {
                 setShowTooFewLettersDialog(true);
             }
         } else {
             if (typedLetters.length < numLetters) {
-                setTypedLetters([...typedLetters, key]);
+                setTypedLetters(typedLetters => fillVowels([...typedLetters, key]));
             }
         }
     };
@@ -191,16 +227,21 @@ export default function SimpleKeyboard() {
                     </div>
                 ))}
                 <div className="row">
-                    {typedLetters.map((letter: string, index) => (
-                        <div key={index} className="box">
-                            {letter}
-                        </div>
-                    ))}
                     {status === "IN_PROGRESS" ? (
                         <>
-                            {Array(numLetters - typedLetters.length).fill(null).map((_, index) => (
-                                <div key={index + typedLetters.length} className="box">{" "}</div>
-                            ))}
+                            {INITIAL_WORD.split("").map((letter, index) => {
+                                const isVowelInInitialWord = isVowel(letter);
+                                const isAlreadyTyped = index < typedLetters.length;
+                                const className = isVowelInInitialWord ? VOWEL_STYLE : "";
+                                const content = isAlreadyTyped ? typedLetters[index] : (isVowelInInitialWord ? letter : "\u00A0");
+                                console.log("content", content);
+                                console.log("isVowelInInitialWord", isVowelInInitialWord);
+                                return (
+                                    <div key={index} className={`box ${className}`}>
+                                        {content}
+                                    </div>
+                                );
+                            })}
                         </>
                     ) : null}
                 </div>
