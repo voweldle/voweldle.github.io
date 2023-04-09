@@ -102,9 +102,15 @@ export default function SimpleKeyboard() {
             return;
         }
         if (key === "Backspace") {
-            // TODO: fix logic to handle backspace properly with vowels
-            // only remove the consonant not vowel!
-            setTypedLetters(typedLetters.slice(0, -1));
+            // truncate typedLetters to the last consonant position
+            // in initial word before the typedLetters.length
+
+            // basically only want to backspace last consonant
+
+            let initial_word_upto_typedLetters_length = INITIAL_WORD.slice(0, typedLetters.length).split("");
+            const lastConsonantIndex = typedLetters.length - 1 - initial_word_upto_typedLetters_length.reverse().findIndex((letter) => !isVowel(letter));
+            const newTypedLetters = typedLetters.slice(0, lastConsonantIndex);
+            setTypedLetters(fillVowels(newTypedLetters));
         } else if (key === "Enter") {
             if (typedLetters.length === numLetters) {
                 const typedWord = typedLetters.join("");
