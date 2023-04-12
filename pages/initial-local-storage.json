@@ -1,0 +1,31 @@
+{
+    "game": {
+        "id": 1,
+        "dayOffset": 1,
+        "boardState": [],
+        "currentRowIndex": 0,
+        "status": "NOT_STARTED",
+        "answer": "",
+        "lastPlayed": "",
+        "lastCompleted": "",
+        "lastGenerated": ""
+    },
+    "settings": {
+        "hardMode": false,
+        "darkMode": false,
+        "colorblindMode": false
+    },
+    "stats": {
+        "currentStreak": 1,
+        "maxStreak": 1,
+        "guesses": {},
+        "winPercentage": 0,
+        "gamesPlayed": 0,
+        "gamesWon": 0,
+        "averageGuesses": 0,
+        "isOnStreak": false,
+        "hasPlayed": false
+    },
+    "timestamp": 0,
+    "schemaVersion": "0.0.1"
+}

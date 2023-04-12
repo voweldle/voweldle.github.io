@@ -1,11 +1,42 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Keyboard from "react-simple-keyboard";
-// import { checkWord } from "./dictionary"; // An example function to check if a word is valid in English
-
 import "react-simple-keyboard/build/css/index.css";
+import initialData from './initial-local-storage.json';
 
-const INITIAL_WORD = "motorist".toUpperCase();
-const numLetters = INITIAL_WORD.length; // Set the number of letters based on the initial word length
+interface GameData {
+    game: {
+        id: number;
+        dayOffset: number;
+        boardState: string[];
+        currentRowIndex: number;
+        status: string;
+        answer: string;
+        lastPlayed: string;
+        lastCompleted: string;
+        lastGenerated: string;
+
+    };
+    settings: {
+        hardMode: boolean;
+        darkMode: boolean;
+        colorblindMode: boolean;
+    };
+    stats: {
+        currentStreak: number;
+        maxStreak: number;
+        guesses: Record<string, any>;
+        winPercentage: number;
+        gamesPlayed: number;
+        gamesWon: number;
+        averageGuesses: number;
+        isOnStreak: boolean;
+        hasPlayed: boolean;
+    };
+    timestamp: number;
+    schemaVersion: string;
+}
+
+
 const VOWEL_STYLE = "vowel";
 
 // function to return true if character is a vowel
@@ -13,20 +44,6 @@ const isVowel = (char: string) => {
     return "AEIOU".includes(char);
 };
 
-// write a function that takes a array of characters as input,
-// pushes in as many consecutive vowels from INITIAL_LETTERS as possible
-// matching up the position correctly and returns the new array
-const fillVowels = (typedLetters: string[]) => {
-    const newTypedLetters = [...typedLetters];
-    for (let i = newTypedLetters.length; i < numLetters; i++) {
-        if (isVowel(INITIAL_WORD[i])) {
-            newTypedLetters.push(INITIAL_WORD[i]);
-        } else {
-            break;
-        }
-    }
-    return newTypedLetters;
-};
 
 export default function SimpleKeyboard() {
     const keyboard = useRef<any | null>(null);
@@ -35,25 +52,105 @@ export default function SimpleKeyboard() {
     const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
     const [showWinDialog, setShowWinDialog] = useState(false);
 
-    const [typedLetters, setTypedLetters] = useState<string[]>(fillVowels([]));
+    const [typedLetters, setTypedLetters] = useState<string[]>([]);
     const [rows, setRows] = useState<Array<{ letter: string; color: string }[]>>(
         []
     );
     const [attempts, setAttempts] = useState(0);
+
+    const [gameData, setGameData] = useState<GameData>(initialData);
+    const [isGameDataLoaded, setIsGameDataLoaded] = useState(false);
+    const [initialWord, setInitialWord] = useState("");
+    const [numLetters, setNumLetters] = useState(0);
+
+    // write a function that takes a array of characters as input,
+    // pushes in as many consecutive vowels from INITIAL_LETTERS as possible
+    // matching up the position correctly and returns the new array
+    const fillVowels = (typedLetters: string[], answer: string) => {
+        const newTypedLetters = [...typedLetters];
+        for (let i = newTypedLetters.length; i < answer.length; i++) {
+            if (isVowel(answer[i])) {
+                newTypedLetters.push(answer[i]);
+            } else {
+                break;
+            }
+        }
+        return newTypedLetters;
+    };
+
+    useEffect(() => {
+
+        const generateInitialWord = async () => {
+            const response = await fetch('/guess_words.txt');
+            const text = await response.text();
+            const words = text.split('\n');
+            const randomIndex = Math.floor(Math.random() * words.length);
+            const randomWord = words[randomIndex].toUpperCase();
+
+
+            setInitialWord(randomWord);
+            setNumLetters(randomWord.length);
+            setTypedLetters(fillVowels([], randomWord));
+            setGameData(gameData => {
+                gameData.game.answer = randomWord;
+                gameData.game.lastGenerated = new Date().toISOString();
+                return gameData;
+            });
+
+            setIsGameDataLoaded(true); // move this line here
+
+        };
+
+        // Load data from local storage when the component mounts
+        var localgameData = localStorage.getItem('gameData');
+        if (localgameData) {
+
+            const gameEnvironment = process.env.NODE_ENV || 'development';
+            const resetThreshold = gameEnvironment === 'development' ? 120000 : 0;
+            let lastGeneratedTime = Date.parse(JSON.parse(localgameData).game.lastGenerated);
+
+            const currentTime = new Date().getTime();
+
+            if (gameEnvironment === 'production') {
+                if (lastGeneratedTime < new Date().setHours(0, 0, 0, 0)) {
+                    generateInitialWord();
+                }
+            } else if (lastGeneratedTime < currentTime - resetThreshold) {
+                generateInitialWord();
+            } else {
+                let localGameDataParsed = JSON.parse(localgameData);
+                setGameData(localGameDataParsed);
+                let answer = localGameDataParsed.game.answer;
+                //get intial word from local storage
+                setInitialWord(answer);
+                const browserRows = localGameDataParsed.game.boardState;
+                // set rows to array of empty arrays of length browserRows.length
+                setRows(Array(browserRows.length).fill([]));
+                setAttempts(browserRows.length);
+                // call updaterows for the all rows
+                browserRows.map((browserRow: string, index: number) => {
+                    return UpdateRows(browserRow, index, answer);
+                });
+                //set number of letters to length of answer
+                setNumLetters(answer.length);
+                setTypedLetters(fillVowels([], answer));
+                setIsGameDataLoaded(true);
+            }
+        } else {
+            generateInitialWord();
+        }
+    }, []);
+
 
     const checkWord = async (word: string) => {
         const response = await fetch('/cleaned_word_list.txt');
         const text = await response.text();
         const words = text.split('\n');
         const lowerCaseWords = words.map(wordi => wordi.toLowerCase());
-
-        //console.log(lowerCaseWords.length)
-        //console.log(lowerCaseWords.includes(word.toLowerCase()));
         return lowerCaseWords.includes(word.toLowerCase());
     }
 
     const onKeyPress = (button: string) => {
-        console.log("Button pressed", button);
         if (button === "{enter}") {
             handleKeyPress("Enter");
         } else if (button === "{backspaceSymbol}") {
@@ -76,6 +173,88 @@ export default function SimpleKeyboard() {
         "{backspaceSymbol}": "⌫"
     };
 
+    //Function to update rows based on the locals storage data
+    async function UpdateRows(word: string, rowIndex: number, answer: string) {
+        //convert browserRow to array of letters
+        const typedLetters = word.split("");
+        const newRow: { letter: string; color: string }[] = generateRowWithColor(typedLetters, word, answer);
+
+        const isWordValid = checkWord(word); // check if the entered word is valid
+        if (await isWordValid) {
+            setRows(rows => {
+                rows[rowIndex] = newRow;
+                return [...rows];
+            });
+            if (newRow.every((item) => item.color === "green")) {
+                setStatus("WIN");
+                setShowWinDialog(true);
+            }
+        } else {
+            setRows(rows => {
+                rows[rowIndex] = newRow.map((item) => ({ ...item, color: "black" }));
+                return [...rows];
+            }
+            );
+
+        }
+    };
+
+    function generateRowWithColor(typedLetters: string[], word: string, answer: string): { letter: string; color: string; }[] {
+        if (word === answer) {
+            return typedLetters.map(
+                letter => {
+                    return { letter, color: "green" };
+                }
+            );
+        }
+
+        return typedLetters.map(
+            (letter, index) => {
+                if ("AEIOU".includes(answer[index])) {
+                    return { letter: answer[index], color: VOWEL_STYLE };
+                } else if (answer[index] === letter) {
+                    return { letter, color: "green" };
+                } else if (answer.includes(letter)) {
+                    // count the number of times letter appears in 
+                    // INITIAL_WORD
+                    const numOccurrences = answer.split("")
+                        .filter((item) => item === letter).length;
+                    // count the number of times letter appears in
+                    // typedWord so far to left index
+                    const numTypedOccurrences = typedLetters
+                        .slice(0, index)
+                        .filter((item) => item === letter).length;
+                    // find number of places where letter appears in
+                    // INITIAL_WORD and typedWord in the same location
+                    const numGreenOccurrences = answer.split("")
+                        .filter((item, index) => item === letter && item === word[index]).length;
+                    // number of green occurences to left of current index
+                    const numGreenOccurrencesToLeft = answer.split("")
+                        .slice(0, index)
+                        .filter((item, index) => item === letter && item === word[index]).length;
+
+                    // now the green occurences will always get the green color
+                    // max number of yellow occurences 
+                    // is numOccurrences - numGreenOccurrences
+                    const maxNumYellowOccurrences = numOccurrences - numGreenOccurrences;
+
+                    // calculate number of yellow occurences to left of current index
+                    const numYellowOccurrencesToLeft = numTypedOccurrences - numGreenOccurrencesToLeft;
+
+                    // if number of yellow occurences to left of current index
+                    // is less than max number of yellow occurences, we give yellow to current index
+                    if (numYellowOccurrencesToLeft < maxNumYellowOccurrences) {
+                        return { letter, color: "yellow" };
+                    } else {
+                        return { letter, color: "red" };
+                    }
+                } else {
+                    return { letter, color: "red" };
+                }
+            }
+        );
+    }
+
     function AutoDisappearingDialogBox({ message, timeout = 3000 }: { message: string, timeout?: number }) {
         useEffect(() => {
             const timer = setTimeout(() => {
@@ -96,99 +275,97 @@ export default function SimpleKeyboard() {
         setShowWinDialog(false); // hide win dialog box
     };
 
+    // add an effect to put gameData in local storage when gameData changes
+    useEffect(() => {
+        if (isGameDataLoaded) {
+            localStorage.setItem('gameData', JSON.stringify(gameData));
+        }
+    }, [gameData, isGameDataLoaded]);
 
     const handleKeyPress = async (key: string) => {
         if (status === "WIN") {
             return;
         }
         if (key === "Backspace") {
-            // truncate typedLetters to the last consonant position
-            // in initial word before the typedLetters.length
+            setTypedLetters(typedLetters => {
+                // truncate typedLetters to the last consonant position
+                // in initial word before the typedLetters.length
 
-            // basically only want to backspace last consonant
+                // basically only want to backspace last consonant
 
-            let initial_word_upto_typedLetters_length = INITIAL_WORD.slice(0, typedLetters.length).split("");
-            const lastConsonantIndex = typedLetters.length - 1 - initial_word_upto_typedLetters_length.reverse().findIndex((letter) => !isVowel(letter));
-            const newTypedLetters = typedLetters.slice(0, lastConsonantIndex);
-            setTypedLetters(fillVowels(newTypedLetters));
+                let initial_word_upto_typedLetters_length = initialWord.slice(0, typedLetters.length).split("");
+                const lastConsonantIndex = typedLetters.length - 1 - initial_word_upto_typedLetters_length.reverse().findIndex((letter) => !isVowel(letter));
+                const newTypedLetters = typedLetters.slice(0, lastConsonantIndex);
+                return fillVowels(newTypedLetters, initialWord);
+            });
+
         } else if (key === "Enter") {
             if (typedLetters.length === numLetters) {
                 const typedWord = typedLetters.join("");
                 const isWordValid = checkWord(typedWord); // check if the entered word is valid
-                let newRow: { letter: string; color: string }[] = [];
 
-                if (typedWord === INITIAL_WORD) {
-                    newRow = typedLetters.map(
-                        letter => {
-                            return { letter, color: "green" };
+                setGameData(gameData => {
+                    return {
+                        ...gameData,
+                        game: {
+                            ...gameData.game,
+                            boardState: [...gameData.game.boardState, typedWord]
                         }
-                    );
-                } else {
-                    newRow = typedLetters.map(
-                        (letter, index) => {
-                            if ("AEIOU".includes(INITIAL_WORD[index])) {
-                                return { letter: INITIAL_WORD[index], color: VOWEL_STYLE };
-                            } else if (INITIAL_WORD[index] === letter) {
-                                return { letter, color: "green" };
-                            } else if (INITIAL_WORD.includes(letter)) {
-                                // count the number of times letter appears in 
-                                // INITIAL_WORD
-                                const numOccurrences = INITIAL_WORD.split("").filter((item) => item === letter).length;
-                                // count the number of times letter appears in
-                                // typedWord so far to left index
-                                const numTypedOccurrences = typedLetters
-                                    .slice(0, index)
-                                    .filter((item) => item === letter).length;
-                                // find number of places where letter appears in
-                                // INITIAL_WORD and typedWord in the same location
-                                const numGreenOccurrences = INITIAL_WORD.split("").filter((item, index) => item === letter && item === typedWord[index]).length;
-                                // number of green occurences to left of current index
-                                const numGreenOccurrencesToLeft = INITIAL_WORD.split("").slice(0, index).filter((item, index) => item === letter && item === typedWord[index]).length;
+                    }
+                }) // save the word to local storage
 
-                                // console.log("numOccurrences", numOccurrences);
-                                // console.log("numTypedOccurrences", numTypedOccurrences);
-                                // console.log("numGreenOccurrences", numGreenOccurrences);
-
-                                // now the green occurences will always get the green color
-
-                                // max number of yellow occurences 
-                                // is numOccurrences - numGreenOccurrences
-                                const maxNumYellowOccurrences = numOccurrences - numGreenOccurrences;
-
-                                // calculate number of yellow occurences to left of current index
-                                const numYellowOccurrencesToLeft = numTypedOccurrences - numGreenOccurrencesToLeft;
-
-                                // if number of yellow occurences to left of current index
-                                // is less than max number of yellow occurences, we give yellow to current index
-                                if (numYellowOccurrencesToLeft < maxNumYellowOccurrences) {
-                                    return { letter, color: "yellow" };
-                                } else {
-                                    return { letter, color: "red" };
-                                }
-                            } else {
-                                return { letter, color: "red" };
-                            }
-                        }
-                    );
-                }
-                setAttempts(attempts + 1);
+                const newRow: { letter: string; color: string }[] = generateRowWithColor(typedLetters, typedWord, initialWord);
+                // TODO: can we refactor below part also to reuse code?
+                setAttempts(attempts => attempts + 1);
                 if (await isWordValid) {
-                    setRows([...rows, newRow]);
-                    setTypedLetters(fillVowels([]));
+                    setRows(rows => [...rows, newRow]);
+                    setTypedLetters(fillVowels([], initialWord));
+
                     if (newRow.every((item) => item.color === "green")) {
+                        setGameData(gameData => {
+                            return {
+                                ...gameData,
+                                game: {
+                                    ...gameData.game,
+                                    lastCompleted: new Date().toISOString(),
+                                    lastPlayed: new Date().toISOString(),
+                                    status: "WIN"
+                                }
+                            }
+                        }) // save the word to local storage
                         setStatus("WIN");
                         setShowWinDialog(true);
                     }
                 } else {
-                    setRows([...rows, newRow.map((item) => ({ ...item, color: "black" }))]);
-                    setTypedLetters(fillVowels([]));
+                    setRows(rows => [...rows, newRow.map((item) => ({ ...item, color: "black" }))]);
+                    setTypedLetters(fillVowels([], initialWord));
+                    setGameData(gameData => {
+                        return {
+                            ...gameData, game:
+                            {
+                                ...gameData.game,
+                                lastPlayed: new Date().toISOString(),
+                                status: "IN_PROGRESS"
+                            }
+                        }
+                    }) // save the word to local storage
+
                 }
+                setGameData(gameData => {
+                    return {
+                        ...gameData,
+                        game: {
+                            ...gameData.game,
+                            currentRowIndex: rows.length
+                        }
+                    }
+                }) // save the word to local storage
             } else {
                 setShowTooFewLettersDialog(true);
             }
         } else {
             if (typedLetters.length < numLetters) {
-                setTypedLetters(typedLetters => fillVowels([...typedLetters, key]));
+                setTypedLetters(typedLetters => fillVowels([...typedLetters, key], initialWord));
             }
         }
     };
@@ -232,16 +409,15 @@ export default function SimpleKeyboard() {
                         ))}
                     </div>
                 ))}
+
                 <div className="row">
                     {status === "IN_PROGRESS" ? (
                         <>
-                            {INITIAL_WORD.split("").map((letter, index) => {
+                            {initialWord.split("").map((letter, index) => {
                                 const isVowelInInitialWord = isVowel(letter);
                                 const isAlreadyTyped = index < typedLetters.length;
                                 const className = isVowelInInitialWord ? VOWEL_STYLE : "";
                                 const content = isAlreadyTyped ? typedLetters[index] : (isVowelInInitialWord ? letter : "\u00A0");
-                                console.log("content", content);
-                                console.log("isVowelInInitialWord", isVowelInInitialWord);
                                 return (
                                     <div key={index} className={`box ${className}`}>
                                         {content}
