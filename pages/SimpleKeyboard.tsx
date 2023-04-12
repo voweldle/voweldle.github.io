@@ -111,11 +111,9 @@ export default function SimpleKeyboard() {
 
             const currentTime = new Date().getTime();
 
-            if (gameEnvironment === 'production') {
-                if (lastGeneratedTime < new Date().setHours(0, 0, 0, 0)) {
-                    generateInitialWord();
-                }
-            } else if (lastGeneratedTime < currentTime - resetThreshold) {
+            if (gameEnvironment === 'production' && lastGeneratedTime < new Date().setHours(0, 0, 0, 0)) {
+                generateInitialWord();
+            } else if (gameEnvironment !== 'production' && lastGeneratedTime < currentTime - resetThreshold) {
                 generateInitialWord();
             } else {
                 let localGameDataParsed = JSON.parse(localgameData);
