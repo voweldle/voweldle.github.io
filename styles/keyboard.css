@@ -60,7 +60,12 @@
 }
 
 .box.black {
-    background-color: black;
+    background-color: darkslategray;
+    color: white;
+}
+
+.box.vowel {
+    background-color: lightslategray;
     color: white;
 }
 
