@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Keyboard from "react-simple-keyboard";
-// import { checkWord } from "./dictionary"; // An example function to check if a word is valid in English
-
 import "react-simple-keyboard/build/css/index.css";
 import initialData from './initial-local-storage.json';
-
-const INITIAL_WORD = "Color".toUpperCase();
 
 interface GameData {
     game: {
@@ -14,10 +10,10 @@ interface GameData {
         boardState: string[];
         currentRowIndex: number;
         status: string;
-        timestamps: {
-            lastPlayed: number;
-            lastCompleted: number;
-        };
+        answer: string;
+        lastPlayed: string;
+        lastCompleted: string;
+
     };
     settings: {
         hardMode: boolean;
@@ -41,8 +37,6 @@ interface GameData {
 
 export default function SimpleKeyboard() {
     const keyboard = useRef<any | null>(null);
-    const numLetters = INITIAL_WORD.length; // Set the number of letters based on the initial word length
-
     const [status, setStatus] = useState("IN_PROGRESS");
     const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
     const [showWinDialog, setShowWinDialog] = useState(false);
@@ -54,45 +48,91 @@ export default function SimpleKeyboard() {
     const [attempts, setAttempts] = useState(0);
 
     const [gameData, setGameData] = useState<GameData>(initialData);
+    const [isGameDataLoaded, setIsGameDataLoaded] = useState(false);
+    const [initialWord, setInitialWord] = useState("");
+    const [numLetters, setNumLetters] = useState(0);
 
     useEffect(() => {
-        console.log("calling useEffect on mount");
+
+        const generateInitialWord = async () => {
+            const response = await fetch('/guess_words.txt');
+            const text = await response.text();
+            const words = text.split('\n');
+            const randomIndex = Math.floor(Math.random() * words.length);
+            const randomWord = words[randomIndex];
+            return randomWord.toUpperCase();
+
+        };
 
         // Load data from local storage when the component mounts
         var localgameData = localStorage.getItem('gameData');
         if (localgameData) {
-            setGameData(JSON.parse(localgameData));
-            const browserRows = JSON.parse(localgameData).game.boardState;
-            // set rows to array of empty arrays of length browserRows.length
-            setRows(Array(browserRows.length).fill([]));
 
-            setAttempts(browserRows.length);
-            // set typedletters to empty array
-            setTypedLetters([]);
+            const gameEnvironment = process.env.NODE_ENV || 'development';
+            const resetThreshold = gameEnvironment === 'development' ? 120000 : 0;
+            const lastPlayedTime = Date.parse(JSON.parse(localgameData).game.lastPlayed);
+            const currentTime = new Date().getTime();
 
-            // call updaterows for the all rows
-            browserRows.map((browserRow: string, index: number) => {
-                return UpdateRows(browserRow, index);
-            });
+            if ((gameEnvironment === 'production' && lastPlayedTime < new Date().setHours(0, 0, 0, 0)) || lastPlayedTime < currentTime - resetThreshold) {
+
+                generateInitialWord().then((word) => {
+
+                    setInitialWord(word);
+                    setNumLetters(word.length);
+                    setGameData(gameData => {
+                        gameData.game.answer = word;
+                        return gameData;
+                    });
+                });
+            }
+
+            else {
+                let localGameDataParsed = JSON.parse(localgameData);
+                setGameData(localGameDataParsed);
+                let answer = localGameDataParsed.game.answer;
+                //get intial word from local storage
+                setInitialWord(answer);
+                const browserRows = localGameDataParsed.game.boardState;
+                // set rows to array of empty arrays of length browserRows.length
+                setRows(Array(browserRows.length).fill([]));
+                setAttempts(browserRows.length);
+                // call updaterows for the all rows
+                browserRows.map((browserRow: string, index: number) => {
+                    return UpdateRows(browserRow, index, answer);
+                });
+                //set number of letters to length of answer
+                setNumLetters(answer.length);
+            }
+
         } else {
-            localStorage.setItem('gameData', JSON.stringify(gameData));
+            generateInitialWord().then((word) => {
+
+                setInitialWord(word);
+                setNumLetters(word.length);
+                setGameData(gameData => {
+                    gameData.game.answer = word;
+                    return gameData;
+                });
+            });
         }
 
+        setIsGameDataLoaded(true);
+        // set typedletters to empty
+        setTypedLetters([]);
+
+
     }, []);
+
 
     const checkWord = async (word: string) => {
         const response = await fetch('/cleaned_word_list.txt');
         const text = await response.text();
         const words = text.split('\n');
         const lowerCaseWords = words.map(wordi => wordi.toLowerCase());
-
-        //console.log(lowerCaseWords.length)
-        //console.log(lowerCaseWords.includes(word.toLowerCase()));
         return lowerCaseWords.includes(word.toLowerCase());
     }
 
     const onKeyPress = (button: string) => {
-        console.log("Button pressed", button);
         if (button === "{enter}") {
             handleKeyPress("Enter");
         } else if (button === "{backspaceSymbol}") {
@@ -116,15 +156,12 @@ export default function SimpleKeyboard() {
     };
 
     //Function to update rows based on the locals storage data
-    async function UpdateRows(word: string, rowIndex: number) {
+    async function UpdateRows(word: string, rowIndex: number, answer: string) {
         //convert browserRow to array of letters
-        console.log("updating browserRow", word);
         const typedLetters = word.split("");
-        const newRow: { letter: string; color: string }[] = generateRowWithColor(typedLetters, word);
+        const newRow: { letter: string; color: string }[] = generateRowWithColor(typedLetters, word, answer);
 
         const isWordValid = checkWord(word); // check if the entered word is valid
-
-        console.log("isWordValid", isWordValid);
         if (await isWordValid) {
             setRows(rows => {
                 rows[rowIndex] = newRow;
@@ -144,15 +181,17 @@ export default function SimpleKeyboard() {
         }
     };
 
-    function generateRowWithColor(typedLetters: string[], word: string): { letter: string; color: string; }[] {
+    function generateRowWithColor(typedLetters: string[], word: string, answer: string): { letter: string; color: string; }[] {
+
         return typedLetters.map(
             (letter, index) => {
-                if (INITIAL_WORD[index] === letter) {
+                if (answer[index] === letter) {
                     return { letter, color: "green" };
-                } else if (INITIAL_WORD.includes(letter)) {
+                } else if (answer.includes(letter)) {
                     // count the number of times letter appears in 
                     // INITIAL_WORD
-                    const numOccurrences = INITIAL_WORD.split("").filter((item) => item === letter).length;
+                    const numOccurrences = answer.split("")
+                        .filter((item) => item === letter).length;
                     // count the number of times letter appears in
                     // typedWord so far to left index
                     const numTypedOccurrences = typedLetters
@@ -160,13 +199,13 @@ export default function SimpleKeyboard() {
                         .filter((item) => item === letter).length;
                     // find number of places where letter appears in
                     // INITIAL_WORD and typedWord in the same location
-                    const numGreenOccurrences = INITIAL_WORD.split("").filter((item, index) => item === letter && item === word[index]).length;
+                    const numGreenOccurrences = answer.split("")
+                        .filter((item, index) => item === letter && item === word[index]).length;
                     // number of green occurences to left of current index
-                    const numGreenOccurrencesToLeft = INITIAL_WORD.split("").slice(0, index).filter((item, index) => item === letter && item === word[index]).length;
+                    const numGreenOccurrencesToLeft = answer.split("")
+                        .slice(0, index)
+                        .filter((item, index) => item === letter && item === word[index]).length;
 
-                    // console.log("numOccurrences", numOccurrences);
-                    // console.log("numTypedOccurrences", numTypedOccurrences);
-                    // console.log("numGreenOccurrences", numGreenOccurrences);
                     // now the green occurences will always get the green color
                     // max number of yellow occurences 
                     // is numOccurrences - numGreenOccurrences
@@ -211,8 +250,10 @@ export default function SimpleKeyboard() {
 
     // add an effect to put gameData in local storage when gameData changes
     useEffect(() => {
-        localStorage.setItem('gameData', JSON.stringify(gameData));
-    }, [gameData]);
+        if (isGameDataLoaded) {
+            localStorage.setItem('gameData', JSON.stringify(gameData));
+        }
+    }, [gameData, isGameDataLoaded]);
 
     const handleKeyPress = async (key: string) => {
         if (status === "WIN") {
@@ -224,22 +265,61 @@ export default function SimpleKeyboard() {
             if (typedLetters.length === numLetters) {
                 const typedWord = typedLetters.join("");
                 const isWordValid = checkWord(typedWord); // check if the entered word is valid
-                setGameData(gameData => { return { ...gameData, game: { ...gameData.game, boardState: [...gameData.game.boardState, typedWord] } } }); // save the word to local storage
-                const newRow: { letter: string; color: string }[] = generateRowWithColor(typedLetters, typedWord);
+
+                setGameData(gameData => {
+                    return {
+                        ...gameData,
+                        game: {
+                            ...gameData.game,
+                            boardState: [...gameData.game.boardState, typedWord]
+                        }
+                    }
+                }) // save the word to local storage
+
+                const newRow: { letter: string; color: string }[] = generateRowWithColor(typedLetters, typedWord, initialWord);
                 // TODO: can we refactor below part also to reuse code?
                 setAttempts(attempts => attempts + 1);
                 if (await isWordValid) {
                     setRows(rows => [...rows, newRow]);
                     setTypedLetters([]);
                     if (newRow.every((item) => item.color === "green")) {
+                        setGameData(gameData => {
+                            return {
+                                ...gameData,
+                                game: {
+                                    ...gameData.game,
+                                    lastCompleted: new Date().toISOString(),
+                                    lastPlayed: new Date().toISOString(),
+                                    status: "WIN"
+                                }
+                            }
+                        }) // save the word to local storage
                         setStatus("WIN");
                         setShowWinDialog(true);
                     }
                 } else {
                     setRows(rows => [...rows, newRow.map((item) => ({ ...item, color: "black" }))]);
                     setTypedLetters([]);
+                    setGameData(gameData => {
+                        return {
+                            ...gameData, game:
+                            {
+                                ...gameData.game,
+                                lastPlayed: new Date().toISOString(),
+                                status: "IN_PROGRESS"
+                            }
+                        }
+                    }) // save the word to local storage
                 }
-
+                setGameData(gameData => {
+                    return {
+                        ...gameData,
+                        game: {
+                            ...gameData.game,
+                            currentRowIndex: rows.length
+                        }
+                    }
+                }) // save the word to local storage
             } else {
                 setShowTooFewLettersDialog(true);
             }
@@ -289,6 +369,7 @@ export default function SimpleKeyboard() {
                         ))}
                     </div>
                 ))}
+
                 <div className="row">
                     {typedLetters.map((letter: string, index) => (
                         <div key={index} className="box">

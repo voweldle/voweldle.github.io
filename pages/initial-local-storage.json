@@ -5,10 +5,9 @@
         "boardState": [],
         "currentRowIndex": 0,
         "status": "NOT_STARTED",
-        "timestamps": {
-            "lastPlayed": 0,
-            "lastCompleted": 0
-        }
+        "answer": "",
+        "lastPlayed": "",
+        "lastCompleted": ""
     },
     "settings": {
         "hardMode": false,
