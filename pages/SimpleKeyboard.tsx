@@ -62,6 +62,8 @@ export default function SimpleKeyboard() {
     const [isGameDataLoaded, setIsGameDataLoaded] = useState(false);
     const [initialWord, setInitialWord] = useState("");
     const [numLetters, setNumLetters] = useState(0);
+    // use ref to store if typed letters update is in progress
+    const isTypedLettersUpdateInProgress = useRef(false);
 
     // write a function that takes a array of characters as input,
     // pushes in as many consecutive vowels from INITIAL_LETTERS as possible
@@ -90,7 +92,11 @@ export default function SimpleKeyboard() {
 
             setInitialWord(randomWord);
             setNumLetters(randomWord.length);
-            setTypedLetters(fillVowels([], randomWord));
+            isTypedLettersUpdateInProgress.current = true;
+            setTypedLetters(() => {
+                isTypedLettersUpdateInProgress.current = false;
+                return fillVowels([], randomWord);
+            });
             setGameData(gameData => {
                 gameData.game.answer = randomWord;
                 gameData.game.lastGenerated = new Date().toISOString();
@@ -131,7 +137,10 @@ export default function SimpleKeyboard() {
                 });
                 //set number of letters to length of answer
                 setNumLetters(answer.length);
-                setTypedLetters(fillVowels([], answer));
+                setTypedLetters(() => {
+                    isTypedLettersUpdateInProgress.current = false;
+                    return fillVowels([], answer);
+                });
                 setIsGameDataLoaded(true);
             }
         } else {
@@ -284,7 +293,11 @@ export default function SimpleKeyboard() {
         if (status === "WIN") {
             return;
         }
+        if (isTypedLettersUpdateInProgress.current) {
+            return;
+        }
         if (key === "Backspace") {
+            isTypedLettersUpdateInProgress.current = true;
             setTypedLetters(typedLetters => {
                 // truncate typedLetters to the last consonant position
                 // in initial word before the typedLetters.length
@@ -294,11 +307,13 @@ export default function SimpleKeyboard() {
                 let initial_word_upto_typedLetters_length = initialWord.slice(0, typedLetters.length).split("");
                 const lastConsonantIndex = typedLetters.length - 1 - initial_word_upto_typedLetters_length.reverse().findIndex((letter) => !isVowel(letter));
                 const newTypedLetters = typedLetters.slice(0, lastConsonantIndex);
+                isTypedLettersUpdateInProgress.current = false;
                 return fillVowels(newTypedLetters, initialWord);
             });
 
         } else if (key === "Enter") {
             if (typedLetters.length === numLetters) {
+                isTypedLettersUpdateInProgress.current = true;
                 const typedWord = typedLetters.join("");
                 const isWordValid = checkWord(typedWord); // check if the entered word is valid
 
@@ -317,7 +332,10 @@ export default function SimpleKeyboard() {
                 setAttempts(attempts => attempts + 1);
                 if (await isWordValid) {
                     setRows(rows => [...rows, newRow]);
-                    setTypedLetters(fillVowels([], initialWord));
+                    setTypedLetters(() => {
+                        isTypedLettersUpdateInProgress.current = false;
+                        return fillVowels([], initialWord)
+                    });
 
                     if (newRow.every((item) => item.color === "green")) {
                         setGameData(gameData => {
@@ -336,7 +354,10 @@ export default function SimpleKeyboard() {
                     }
                 } else {
                     setRows(rows => [...rows, newRow.map((item) => ({ ...item, color: "black" }))]);
-                    setTypedLetters(fillVowels([], initialWord));
+                    setTypedLetters(() => {
+                        isTypedLettersUpdateInProgress.current = false;
+                        return fillVowels([], initialWord)
+                    });
                     setGameData(gameData => {
                         return {
                             ...gameData, game:
@@ -363,7 +384,11 @@ export default function SimpleKeyboard() {
             }
         } else {
             if (typedLetters.length < numLetters) {
-                setTypedLetters(typedLetters => fillVowels([...typedLetters, key], initialWord));
+                isTypedLettersUpdateInProgress.current = true;
+                setTypedLetters(typedLetters => {
+                    isTypedLettersUpdateInProgress.current = false;
+                    return fillVowels([...typedLetters, key], initialWord)
+                });
             }
         }
     };
