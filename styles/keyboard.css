@@ -1,3 +1,11 @@
+:root {
+    --color-green: rgb(90, 161, 90);
+    --color-red: rgba(221, 48, 65, 0.833);
+    --color-vowel: lightslategray;
+    --color-black: darkslategray;
+    --color-yellow: rgba(230, 180, 17, 0.8);
+}
+
 .keyboard-container {
     width: 100%;
     max-width: 850px;
@@ -46,27 +54,27 @@
 }
 
 .box.green {
-    background-color: rgb(90, 161, 90);
+    background-color: var(--color-green);
     color: white;
 }
 
 .box.yellow {
-    background-color: rgba(230, 180, 17, 0.8);
+    background-color: var(--color-yellow);
     color: white;
 }
 
 .box.red {
-    background-color: rgba(221, 48, 65, 0.833);
+    background-color: var(--color-red);
     color: white;
 }
 
 .box.black {
-    background-color: darkslategray;
+    background-color: var(--color-black);
     color: white;
 }
 
 .box.vowel {
-    background-color: lightslategray;
+    background-color: var(--color-vowel);
     color: white;
 }
 
@@ -115,4 +123,30 @@
     background: none;
     border: none;
     cursor: pointer;
+}
+
+.key-green {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+
+.key-yellow {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+.key-red {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+.key-vowel {
+    background-color: var(--color-vowel) !important;
+    color: white !important;
+}
+
+.key-none {
+    background-color: white !important;
+    color: black !important;
 }

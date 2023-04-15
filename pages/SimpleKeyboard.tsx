@@ -44,11 +44,11 @@ const isVowel = (char: string) => {
     return "AEIOU".includes(char);
 };
 
+const LETTERS = "QWERTYUIOPASDFGHJKLZXCVBNM";
 
 export default function SimpleKeyboard() {
     const keyboard = useRef<any | null>(null);
 
-    const [status, setStatus] = useState("IN_PROGRESS");
     const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
     const [showWinDialog, setShowWinDialog] = useState(false);
 
@@ -62,6 +62,17 @@ export default function SimpleKeyboard() {
     const [isGameDataLoaded, setIsGameDataLoaded] = useState(false);
     const [initialWord, setInitialWord] = useState("");
     const [numLetters, setNumLetters] = useState(0);
+    const [buttonTheme, setButtonTheme] = useState<{ class: string; buttons: string; }[]>([]);
+
+    // create key colors state, mapping letters to colors, initially setting
+    // all letters to none, and vowels to "vowel"
+    const [keyColors, setKeyColors] = useState(
+        LETTERS.split("").reduce((acc, letter) => {
+            acc[letter] = isVowel(letter) ? VOWEL_STYLE : "none";
+            return acc;
+        }, {} as Record<string, string>)
+    );
+
     // use ref to store if typed letters update is in progress
     const isTypedLettersUpdateInProgress = useRef(false);
 
@@ -83,12 +94,11 @@ export default function SimpleKeyboard() {
     useEffect(() => {
 
         const generateInitialWord = async () => {
-            const response = await fetch('/guess_words.txt');
+            const response = await fetch('/game_word_list.txt');
             const text = await response.text();
             const words = text.split('\n');
             const randomIndex = Math.floor(Math.random() * words.length);
             const randomWord = words[randomIndex].toUpperCase();
-
 
             setInitialWord(randomWord);
             setNumLetters(randomWord.length);
@@ -98,8 +108,10 @@ export default function SimpleKeyboard() {
                 return fillVowels([], randomWord);
             });
             setGameData(gameData => {
+                gameData.game.boardState = [];
                 gameData.game.answer = randomWord;
                 gameData.game.lastGenerated = new Date().toISOString();
+                gameData.game.status = 'IN_PROGRESS';
                 return gameData;
             });
 
@@ -150,9 +162,10 @@ export default function SimpleKeyboard() {
 
 
     const checkWord = async (word: string) => {
-        const response = await fetch('/cleaned_word_list.txt');
+        const response = await fetch('/enable_word_list.txt');
         const text = await response.text();
         const words = text.split('\n');
+        console.log(words);
         const lowerCaseWords = words.map(wordi => wordi.toLowerCase());
         return lowerCaseWords.includes(word.toLowerCase());
     }
@@ -180,6 +193,50 @@ export default function SimpleKeyboard() {
         "{backspaceSymbol}": "⌫"
     };
 
+    // make buttonTheme using keyColors
+    // to set the class of each button. 
+    // If the key has keyColors C, then the class name should be "key-C"
+    // Filter out any cases when the buttons is empty
+    // Filter out any cases when the buttons is empty
+    useEffect(() => {
+        setButtonTheme(["green", "red", "yellow", "none", "vowel"].map(color => {
+            return {
+                class: `key-${color}`,
+                buttons: Object.keys(keyColors).filter(key => keyColors[key] === color).join(" ")
+            };
+        }).filter((item) => item.buttons !== ""));
+    }, [keyColors]);
+
+    function updateKeyColors(currentKeyColor: Record<string, string>, newRow: { letter: string; color: string; }[]) {
+
+        const newKeyColors = { ...currentKeyColor };
+        newRow.forEach((item) => {
+            // 1. if the letter is a vowel do nothing
+            // 2. if the letter color was previously green, do nothing
+            // 3. if the letter color was previously red, do nothing
+            // 4. if the letter color was previously yellow but is now green,
+            //    change it to green
+            // 5. if the letter color was previously none, set to current color
+            if (!isVowel(item.letter)) {
+                if (newKeyColors[item.letter] === "yellow" && item.color === "green") {
+                    newKeyColors[item.letter] = "green";
+                } else if (newKeyColors[item.letter] === "none") {
+                    newKeyColors[item.letter] = item.color;
+                }
+            }
+        });
+        return newKeyColors;
+    }
+
+    function updateKeyColorsOnWin(currentKeyColor: Record<string, string>, answer: string) {
+        // mark all letters in answer as green, even vowels
+        const newKeyColors = { ...currentKeyColor };
+        answer.split("").forEach((letter) => {
+            newKeyColors[letter] = "green";
+        });
+        return newKeyColors;
+    }
+
     //Function to update rows based on the locals storage data
     async function UpdateRows(word: string, rowIndex: number, answer: string) {
         //convert browserRow to array of letters
@@ -192,9 +249,11 @@ export default function SimpleKeyboard() {
                 rows[rowIndex] = newRow;
                 return [...rows];
             });
+            // set key colors according to the new row
+            setKeyColors((currentKeyColors) => updateKeyColors(currentKeyColors, newRow));
             if (newRow.every((item) => item.color === "green")) {
-                setStatus("WIN");
                 setShowWinDialog(true);
+                setKeyColors((currentKeyColors) => updateKeyColorsOnWin(currentKeyColors, answer));
             }
         } else {
             setRows(rows => {
@@ -290,7 +349,7 @@ export default function SimpleKeyboard() {
     }, [gameData, isGameDataLoaded]);
 
     const handleKeyPress = async (key: string) => {
-        if (status === "WIN") {
+        if (gameData.game.status === "WIN") {
             return;
         }
         if (isTypedLettersUpdateInProgress.current) {
@@ -336,6 +395,8 @@ export default function SimpleKeyboard() {
                         isTypedLettersUpdateInProgress.current = false;
                         return fillVowels([], initialWord)
                     });
+                    // set key colors according to the new row
+                    setKeyColors((currentKeyColors) => updateKeyColors(currentKeyColors, newRow));
 
                     if (newRow.every((item) => item.color === "green")) {
                         setGameData(gameData => {
@@ -348,8 +409,8 @@ export default function SimpleKeyboard() {
                                     status: "WIN"
                                 }
                             }
-                        }) // save the word to local storage
-                        setStatus("WIN");
+                        }); // save the word to local storage
+                        setKeyColors((currentKeyColors) => updateKeyColorsOnWin(currentKeyColors, initialWord));
                         setShowWinDialog(true);
                     }
                 } else {
@@ -434,7 +495,7 @@ export default function SimpleKeyboard() {
                 ))}
 
                 <div className="row">
-                    {status === "IN_PROGRESS" ? (
+                    {gameData.game.status === "IN_PROGRESS" ? (
                         <>
                             {initialWord.split("").map((letter, index) => {
                                 const isVowelInInitialWord = isVowel(letter);
@@ -458,6 +519,7 @@ export default function SimpleKeyboard() {
                     layout={customLayout}
                     display={customDisplay}
                     onKeyPress={onKeyPress}
+                    buttonTheme={buttonTheme}
                 />
             </div>
             <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />

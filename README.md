@@ -40,3 +40,8 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Word lists used
+- For checking if the guessed word is valid, we use ENABLE (Enhanced North American Benchmark Lexicon). ENABLE is a widely used word list for word games like Scrabble. It contains over 170,000 words but doesn't include proper nouns. You can download the ENABLE word list here: https://www.wordgamedictionary.com/enable/. We fixed up the line endings to UNIX line endings.
+- The words for the game are generated using the jupyter notebook `generate_word_list.ipynb`.
+
