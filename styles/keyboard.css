@@ -10,7 +10,7 @@
     width: 100%;
     max-width: 850px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 5px;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
     font-size: 20px;
@@ -24,10 +24,21 @@
 
 .virtual-keyboard {
     width: 100%;
-    max-width: 750px;
+    max-width: 400px;
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 10px;
+}
+
+.virtual-keyboard .simple-keyboard .hg-row:nth-child(2) {
+    margin-left: 4%;
+    margin-right: 4%;
+}
+
+.virtual-keyboard .simple-keyboard .hg-row:nth-child(3) .hg-button:first-child {
+    width: 35px;
+    font-size: 0.7rem;
+    font-weight: bold;
 }
 
 .box-container {
@@ -51,6 +62,7 @@
     color: black;
     background-color: white;
     align-self: center;
+    font-weight: bold;
 }
 
 .box.green {
