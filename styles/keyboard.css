@@ -76,6 +76,13 @@ html {
     /* Add this line to set the top position */
 }
 
+@media screen and (max-width: 768px) {
+    .box-container {
+        max-height: calc(100vh - 300px);
+        /* Adjust the max-height for mobile devices */
+    }
+}
+
 .box {
     display: inline-flex;
     justify-content: center;
