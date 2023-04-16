@@ -134,6 +134,8 @@ html {
     justify-content: center;
     align-items: center;
     z-index: 100;
+    pointer-events: none;
+    /* Allow clicks to go through */
 }
 
 .dialog-box,
@@ -148,6 +150,8 @@ html {
     font-size: 20px;
     /* Add the font-size property */
     z-index: 100;
+    pointer-events: auto;
+    /* clicks go through */
 }
 
 .dialog-box {
@@ -179,6 +183,14 @@ html {
     background: none;
     border: none;
     cursor: pointer;
+}
+
+/* Add this media query for mobile devices */
+@media screen and (max-width: 768px) {
+    .close-button {
+        font-size: 1.5rem;
+        /* Increase the font size for mobile devices */
+    }
 }
 
 .key-green {
