@@ -63,6 +63,7 @@ export default function SimpleKeyboard() {
     const [initialWord, setInitialWord] = useState("");
     const [numLetters, setNumLetters] = useState(0);
     const [buttonTheme, setButtonTheme] = useState<{ class: string; buttons: string; }[]>([]);
+    const boxContainerRef = useRef<HTMLDivElement>(null);
 
     // create key colors state, mapping letters to colors, initially setting
     // all letters to none, and vowels to "vowel"
@@ -348,6 +349,18 @@ export default function SimpleKeyboard() {
         }
     }, [gameData, isGameDataLoaded]);
 
+
+    // automatically scroll box container to the bottom
+    useEffect(() => {
+        const scrollToBottom = () => {
+            if (boxContainerRef.current) {
+                boxContainerRef.current.scrollTop = boxContainerRef.current.scrollHeight;
+            }
+        };
+
+        scrollToBottom();
+    }, [rows]); // Add appropriate dependencies if needed    
+
     const handleKeyPress = async (key: string) => {
         if (gameData.game.status === "WIN") {
             return;
@@ -479,60 +492,65 @@ export default function SimpleKeyboard() {
     }, [handleKeyDown]);
 
     return (
-        <div className="keyboard-container">
-            <div className="box-container">
-                {rows.map((row, rowIndex) => (
-                    <div key={rowIndex} className="row">
-                        {row.map((item, index) => (
-                            <div
-                                key={index}
-                                className={`box ${item.color}`}
-                            >
-                                {item.letter === " " ? "\u00A0" : item.letter}
-                            </div>
-                        ))}
-                    </div>
-                ))}
+        <>
+            <div className="keyboard-container">
+                <div className="box-container" ref={boxContainerRef}>
+                    {rows.map((row, rowIndex) => (
+                        <div key={rowIndex} className="row">
+                            {row.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className={`box ${item.color}`}
+                                >
+                                    {item.letter === " " ? "\u00A0" : item.letter}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
 
-                <div className="row">
-                    {gameData.game.status === "IN_PROGRESS" ? (
-                        <>
-                            {initialWord.split("").map((letter, index) => {
-                                const isVowelInInitialWord = isVowel(letter);
-                                const isAlreadyTyped = index < typedLetters.length;
-                                const className = isVowelInInitialWord ? VOWEL_STYLE : "";
-                                const content = isAlreadyTyped ? typedLetters[index] : (isVowelInInitialWord ? letter : "\u00A0");
-                                return (
-                                    <div key={index} className={`box ${className}`}>
-                                        {content}
-                                    </div>
-                                );
-                            })}
-                        </>
-                    ) : null}
-                </div>
-            </div>
-
-            <div className="virtual-keyboard">
-                <Keyboard
-                    keyboardRef={(r) => (keyboard.current = r)}
-                    layout={customLayout}
-                    display={customDisplay}
-                    onKeyPress={onKeyPress}
-                    buttonTheme={buttonTheme}
-                />
-            </div>
-            <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />
-
-            {showWinDialog && ( // render win dialog box if showWinDialog is true
-                <div className="win-dialog-box">
-                    <div className="message">
-                        <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
-                        <p>You win! Attempts: {attempts}</p>
+                    <div className="row">
+                        {gameData.game.status === "IN_PROGRESS" ? (
+                            <>
+                                {initialWord.split("").map((letter, index) => {
+                                    const isVowelInInitialWord = isVowel(letter);
+                                    const isAlreadyTyped = index < typedLetters.length;
+                                    const className = isVowelInInitialWord ? VOWEL_STYLE : "";
+                                    const content = isAlreadyTyped ? typedLetters[index] : (isVowelInInitialWord ? letter : "\u00A0");
+                                    return (
+                                        <div key={index} className={`box ${className}`}>
+                                            {content}
+                                        </div>
+                                    );
+                                })}
+                            </>
+                        ) : null}
                     </div>
                 </div>
-            )}
 
-        </div>
+                <div className="virtual-keyboard">
+                    <Keyboard
+                        keyboardRef={(r) => (keyboard.current = r)}
+                        layout={customLayout}
+                        display={customDisplay}
+                        onKeyPress={onKeyPress}
+                        buttonTheme={buttonTheme}
+                    />
+                </div>
+
+
+            </div>
+            <div className="dialog-box-wrapper">
+                <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />
+
+                {showWinDialog && ( // render win dialog box if showWinDialog is true
+                    <div className="win-dialog-box">
+                        <div className="message">
+                            <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
+                            <p>You win! Attempts: {attempts}</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     );
 }

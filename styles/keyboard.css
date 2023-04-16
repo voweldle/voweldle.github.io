@@ -6,6 +6,11 @@
     --color-yellow: rgba(230, 180, 17, 0.8);
 }
 
+body,
+html {
+    height: 100%;
+}
+
 .keyboard-container {
     width: 100%;
     max-width: 850px;
@@ -20,6 +25,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 .virtual-keyboard {
@@ -35,9 +44,17 @@
     margin-right: 4%;
 }
 
+/* enter key */
 .virtual-keyboard .simple-keyboard .hg-row:nth-child(3) .hg-button:first-child {
     width: 35px;
     font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* backspace key */
+.virtual-keyboard .simple-keyboard .hg-row:nth-child(3) .hg-button:last-child {
+    width: 35px;
+    font-size: 1.2rem;
     font-weight: bold;
 }
 
@@ -49,6 +66,14 @@
     margin-bottom: 5px;
     justify-content: center;
     padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    /* Adjust this value based on the height of the virtual keyboard */
+    margin-top: 10px;
+    position: fixed;
+    /* Add this line to pin the box-container to the top */
+    top: 0;
+    /* Add this line to set the top position */
 }
 
 .box {
@@ -99,8 +124,33 @@
     justify-content: center;
 }
 
+.dialog-box-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.dialog-box,
+.win-dialog-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    /* Add the
+    font-family property */
+    font-size: 20px;
+    /* Add the font-size property */
+    z-index: 100;
+}
+
 .dialog-box {
-    position: relative;
     margin: 10px 0;
     padding: 10px;
     border: 2px solid #333;
@@ -111,12 +161,6 @@
 }
 
 .win-dialog-box {
-    display: flex;
-    /* add flexbox */
-    justify-content: center;
-    /* center horizontally */
-    align-items: center;
-    /* center vertically */
     position: relative;
     border: 2px solid #333;
     background-color: #eee;
