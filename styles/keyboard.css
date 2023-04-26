@@ -2,7 +2,7 @@
     --color-green: rgb(90, 161, 90);
     --color-red: rgba(221, 48, 65, 0.833);
     --color-vowel: lightslategray;
-    --color-black: darkslategray;
+    --color-black: rgb(35, 33, 35);
     --color-yellow: rgba(230, 180, 17, 0.8);
 }
 
@@ -11,7 +11,7 @@ html {
     height: 100%;
 }
 
-.keyboard-container {
+.game-container {
     width: 100%;
     max-width: 850px;
     margin: 0 auto;
@@ -67,7 +67,7 @@ html {
     justify-content: center;
     padding-bottom: 20px;
     overflow-y: auto;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 250px);
     /* Adjust this value based on the height of the virtual keyboard */
     margin-top: 10px;
     position: fixed;
@@ -78,7 +78,7 @@ html {
 
 @media screen and (max-width: 768px) {
     .box-container {
-        max-height: calc(100vh - 300px);
+        max-height: calc(100vh - 250px);
         /* Adjust the max-height for mobile devices */
     }
 }
@@ -224,4 +224,80 @@ html {
 .key-none {
     background-color: white !important;
     color: black !important;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    color: rgb(var(--foreground-rgb));
+    padding: 2rem 4rem;
+    position: relative;
+}
+
+h1 {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+h1 span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid white;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+h1 span:nth-child(1) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(2) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(3) {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(4) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(5) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(6) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(7) {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(8) {
+    background-color: var(--color-red) !important;
+    color: white !important;
 }

@@ -13,6 +13,7 @@
     },
     "homepage": "https://voweldle.github.io",
     "dependencies": {
+        "@stdlib/random": "^0.0.12",
         "@types/node": "18.15.11",
         "@types/react": "18.0.31",
         "@types/react-dom": "18.0.11",
@@ -21,10 +22,13 @@
         "next": "13.2.4",
         "react": "18.2.0",
         "react-dom": "18.2.0",
+        "react-router-dom": "^6.10.0",
         "react-simple-keyboard": "^3.5.48",
+        "seedrandom": "^3.0.5",
         "typescript": "5.0.3"
     },
     "devDependencies": {
+        "@types/seedrandom": "^3.0.5",
         "gh-pages": "^5.0.0"
     }
 }

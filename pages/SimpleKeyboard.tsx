@@ -2,6 +2,11 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import initialData from './initial-local-storage.json';
+import seedrandom from "seedrandom";
+
+interface KeyboardComponentProps {
+    mode: string;
+}
 
 interface GameData {
     game: {
@@ -46,7 +51,7 @@ const isVowel = (char: string) => {
 
 const LETTERS = "QWERTYUIOPASDFGHJKLZXCVBNM";
 
-export default function SimpleKeyboard() {
+export default function SimpleKeyboard(props: KeyboardComponentProps) {
     const keyboard = useRef<any | null>(null);
 
     const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
@@ -92,14 +97,46 @@ export default function SimpleKeyboard() {
         return newTypedLetters;
     };
 
+
+    // below useeffect runs when the component mounts
     useEffect(() => {
 
         const generateInitialWord = async () => {
-            const response = await fetch('/game_word_list.txt');
-            const text = await response.text();
-            const words = text.split('\n');
-            const randomIndex = Math.floor(Math.random() * words.length);
-            const randomWord = words[randomIndex].toUpperCase();
+            var randomWord = "";
+            if (props.mode === "practice") {
+                const response = await fetch('/game_word_list.txt');
+                const text = await response.text();
+                const words = text.trim().split('\n');
+                const randomIndex = Math.floor(Math.random() * words.length);
+                randomWord = words[randomIndex].toUpperCase();
+            } else {
+                // Set the start date for your game
+                const startDate = new Date("2023-04-01");
+                // Calculate the number of days elapsed since the start date
+                const today = new Date();
+                const elapsedDays = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+                // Read the list of game words
+                const response = await fetch("/game_word_list.txt");
+                const text = await response.text();
+                const words = text.trim().split("\n");
+
+                // Shuffle the list of words using the seed
+                const seed = "voweldle";
+                const shuffle = (array: string[], seed: string) => {
+                    const rng = seedrandom(seed);
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(rng() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                    return array;
+                };
+                const shuffledWords = shuffle(words.slice(), seed);
+
+                // Use the elapsed days as the index to get the random word
+                const index = elapsedDays % words.length;
+
+                randomWord = shuffledWords[index].toUpperCase();
+            }
 
             setInitialWord(randomWord);
             setNumLetters(randomWord.length);
@@ -122,21 +159,16 @@ export default function SimpleKeyboard() {
 
         // Load data from local storage when the component mounts
         var localgameData = localStorage.getItem('gameData');
-        if (localgameData) {
+        if (localgameData && props.mode !== "practice") {
 
-            const gameEnvironment = process.env.NODE_ENV || 'development';
-            const resetThreshold = gameEnvironment === 'development' ? 120000 : 0;
             let lastGeneratedTime = Date.parse(JSON.parse(localgameData).game.lastGenerated);
 
-            const currentTime = new Date().getTime();
-
-            if (gameEnvironment === 'production' && lastGeneratedTime < new Date().setHours(0, 0, 0, 0)) {
-                generateInitialWord();
-            } else if (gameEnvironment !== 'production' && lastGeneratedTime < currentTime - resetThreshold) {
+            if (lastGeneratedTime < new Date().setHours(0, 0, 0, 0)) {
                 generateInitialWord();
             } else {
                 let localGameDataParsed = JSON.parse(localgameData);
                 setGameData(localGameDataParsed);
+
                 let answer = localGameDataParsed.game.answer;
                 //get intial word from local storage
                 setInitialWord(answer);
@@ -166,7 +198,6 @@ export default function SimpleKeyboard() {
         const response = await fetch('/enable_word_list.txt');
         const text = await response.text();
         const words = text.split('\n');
-        console.log(words);
         const lowerCaseWords = words.map(wordi => wordi.toLowerCase());
         return lowerCaseWords.includes(word.toLowerCase());
     }
@@ -208,6 +239,7 @@ export default function SimpleKeyboard() {
         }).filter((item) => item.buttons !== ""));
     }, [keyColors]);
 
+
     function updateKeyColors(currentKeyColor: Record<string, string>, newRow: { letter: string; color: string; }[]) {
 
         const newKeyColors = { ...currentKeyColor };
@@ -237,6 +269,7 @@ export default function SimpleKeyboard() {
         });
         return newKeyColors;
     }
+
 
     //Function to update rows based on the locals storage data
     async function UpdateRows(word: string, rowIndex: number, answer: string) {
@@ -344,7 +377,7 @@ export default function SimpleKeyboard() {
 
     // add an effect to put gameData in local storage when gameData changes
     useEffect(() => {
-        if (isGameDataLoaded) {
+        if (isGameDataLoaded && props.mode !== "practice") {
             localStorage.setItem('gameData', JSON.stringify(gameData));
         }
     }, [gameData, isGameDataLoaded]);
@@ -444,6 +477,7 @@ export default function SimpleKeyboard() {
                     }) // save the word to local storage
 
                 }
+
                 setGameData(gameData => {
                     return {
                         ...gameData,
@@ -452,7 +486,7 @@ export default function SimpleKeyboard() {
                             currentRowIndex: rows.length
                         }
                     }
-                }) // save the word to local storage
+                }); // save the word to local storage
             } else {
                 setShowTooFewLettersDialog(true);
             }
@@ -492,39 +526,52 @@ export default function SimpleKeyboard() {
     }, [handleKeyDown]);
 
     return (
-        <>
-            <div className="keyboard-container">
-                <div className="box-container" ref={boxContainerRef}>
+
+        <div>
+            <div className="top-bar">
+                <h1>
+                    <span>V</span>
+                    <span>O</span>
+                    <span>W</span>
+                    <span>E</span>
+                    <span>L</span>
+                    <span>D</span>
+                    <span>L</span>
+                    <span>E</span>
+                </h1>
+            </div>
+
+            <div className="game-container">
+                <div className="box-container" ref={boxContainerRef} style={{ marginTop: "5.5rem" }}>
                     {rows.map((row, rowIndex) => (
                         <div key={rowIndex} className="row">
                             {row.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className={`box ${item.color}`}
-                                >
+                                <div key={index} className={`box ${item.color}`}>
                                     {item.letter === " " ? "\u00A0" : item.letter}
                                 </div>
                             ))}
                         </div>
                     ))}
 
+
                     <div className="row">
                         {gameData.game.status === "IN_PROGRESS" ? (
-                            <>
+                            <div>
                                 {initialWord.split("").map((letter, index) => {
                                     const isVowelInInitialWord = isVowel(letter);
                                     const isAlreadyTyped = index < typedLetters.length;
                                     const className = isVowelInInitialWord ? VOWEL_STYLE : "";
-                                    const content = isAlreadyTyped ? typedLetters[index] : (isVowelInInitialWord ? letter : "\u00A0");
+                                    const content = isAlreadyTyped ? typedLetters[index] : isVowelInInitialWord ? letter : "\u00A0";
                                     return (
                                         <div key={index} className={`box ${className}`}>
                                             {content}
                                         </div>
                                     );
                                 })}
-                            </>
+                            </div>
                         ) : null}
                     </div>
+
                 </div>
 
                 <div className="virtual-keyboard">
@@ -537,20 +584,20 @@ export default function SimpleKeyboard() {
                     />
                 </div>
 
-
             </div>
+
             <div className="dialog-box-wrapper">
                 <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />
 
-                {showWinDialog && ( // render win dialog box if showWinDialog is true
+                {showWinDialog && (
                     <div className="win-dialog-box">
                         <div className="message">
                             <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
-                            <p>You win! Attempts: {attempts}</p>
+                            <p>You Win! Attempts: {attempts}</p>
                         </div>
                     </div>
                 )}
             </div>
-        </>
+        </div >
     );
-}
+};
