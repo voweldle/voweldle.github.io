@@ -162,8 +162,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
         if (localgameData && props.mode !== "practice") {
 
             let lastGeneratedTime = Date.parse(JSON.parse(localgameData).game.lastGenerated);
-
-            if (lastGeneratedTime < new Date().setHours(0, 0, 0, 0)) {
+            if (lastGeneratedTime < new Date().setUTCHours(0, 0, 0, 0)) {
                 generateInitialWord();
             } else {
                 let localGameDataParsed = JSON.parse(localgameData);
