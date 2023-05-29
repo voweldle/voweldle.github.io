@@ -713,26 +713,26 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
 
                                 </div>
 
-                                <div className="instuction_word_guess_desc" style={{ display: "table", margin: "2px" }}>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-yellow)", color: "white" }}>P</span>
-                                        <p style={{ marginLeft: "5px" }}>Yellow means letter is present somewhere else in the answer word</p>
+                                <div className="instruction_word_guess_desc">
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-yellow)", color: "white" }}>P</div>
+                                        <p>Yellow means letter is present somewhere else in the answer word</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-vowel)", color: "white" }}>A</span>
-                                        <p style={{ marginLeft: "5px" }}>Grey represents vower which are prefilled</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-vowel)", color: "white" }}>A</div>
+                                        <p>Grey represents vowel which are prefilled</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-red)", color: "white" }}>R</span>
-                                        <p style={{ marginLeft: "5px" }}>Red means letter is not present in the answer word</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-red)", color: "white" }}>R</div>
+                                        <p>Red means letter is not present in the answer word</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-red)", color: "white" }}>T</span>
-                                        <p style={{ marginLeft: "5px" }}>Red means letter is not present in the answer word</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-red)", color: "white" }}>T</div>
+                                        <p>Red means letter is not present in the answer word</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-green)", color: "white" }}>Y</span>
-                                        <p style={{ marginLeft: "5px" }}>Green means letter is present at correct position in the answer word</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-green)", color: "white" }}>Y</div>
+                                        <p>Green means letter is present at correct position in the answer word</p>
                                     </div>
                                 </div>
 
