@@ -58,6 +58,14 @@ html {
     font-weight: bold;
 }
 
+@media screen and (max-width: 768px) {
+    .virtual-keyboard .simple-keyboard .hg-row:nth-child(3) .hg-button:last-child {
+        font-size: 1.8rem;
+        font-family: "Symbol", Arial, sans-serif;
+        font-weight: normal;
+    }
+}
+
 .box-container {
     display: flex;
     flex-wrap: wrap;

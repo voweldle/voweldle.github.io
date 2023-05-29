@@ -536,8 +536,8 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     // physical keyboard events
     const handleKeyDown = useCallback(
         (event: KeyboardEvent) => {
-            const { key } = event;
-            if (/^[a-zA-Z]$/.test(key)) {
+            const { key, metaKey } = event;
+            if (/^[a-zA-Z]$/.test(key) && !metaKey) {
                 const capitalizedKey = key.toUpperCase();
                 handleKeyPress(capitalizedKey);
             } else if (key === "Enter") {
