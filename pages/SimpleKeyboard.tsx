@@ -3,6 +3,11 @@ import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import initialData from './initial-local-storage.json';
 import seedrandom from "seedrandom";
+import Head from "next/head";
+import { slide as Menu } from 'react-burger-menu';
+import { Modal } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
+
 
 interface KeyboardComponentProps {
     mode: string;
@@ -68,6 +73,33 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     const [initialWord, setInitialWord] = useState("");
     const [numLetters, setNumLetters] = useState(0);
     const [buttonTheme, setButtonTheme] = useState<{ class: string; buttons: string; }[]>([]);
+    const [visible, setVisible] = useState(false);
+
+    const showHelpDialog = () => {
+        setVisible(true);
+    };
+
+    const handleOk = () => {
+        setVisible(false);
+    };
+
+    const handleCancel = () => {
+        setVisible(false);
+    };
+
+    const [visibleAbout, setVisibleAbout] = useState(false);
+
+    const showAboutDialog = () => {
+        setVisibleAbout(true);
+    };
+
+    const handleAboutOk = () => {
+        setVisibleAbout(false);
+    };
+
+    const handleAboutCancel = () => {
+        setVisibleAbout(false);
+    };
     const boxContainerRef = useRef<HTMLDivElement>(null);
 
     // create key colors state, mapping letters to colors, initially setting
@@ -527,19 +559,33 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     return (
 
         <div>
-            <div className="top-bar">
-                <h1>
-                    <span>V</span>
-                    <span>O</span>
-                    <span>W</span>
-                    <span>E</span>
-                    <span>L</span>
-                    <span>D</span>
-                    <span>L</span>
-                    <span>E</span>
-                </h1>
-            </div>
+            <Head>
+                <title>Voweldle</title>
+                <meta name="keywords" content="voweldle, word game, word puzzle, word search, word search game, word search puzzle, word puzzle game, word puzzle, word puzzle game, word" />
+                <meta name="description" content="Voweldle is a word game where you have to guess the word by filling in the consonants. It is a fun and challenging word puzzle game." />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
 
+            <div className="top-container">
+                <Menu width={'200px'}>
+                    <a id="home" className="menu-item" href="/">GAME</a>
+                    <a id="about" className="menu-item" onClick={showAboutDialog}>ABOUT</a>
+                    <a className="menu-item--small" onClick={showHelpDialog} >INSTRUCTIONS</a>
+                </Menu>
+                <div className="top-bar">
+
+                    <h1>
+                        <span>V</span>
+                        <span>O</span>
+                        <span>W</span>
+                        <span>E</span>
+                        <span>L</span>
+                        <span>D</span>
+                        <span>L</span>
+                        <span>E</span>
+                    </h1>
+                </div>
+            </div>
             <div className="game-container">
                 <div className="box-container" ref={boxContainerRef} style={{ marginTop: "5.5rem" }}>
                     {rows.map((row, rowIndex) => (
@@ -589,14 +635,144 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                 <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />
 
                 {showWinDialog && (
-                    <div className="win-dialog-box">
-                        <div className="message">
-                            <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
-                            <p>You Win! Attempts: {attempts}</p>
-                        </div>
+                    // <div className="win-dialog-box">
+                    //     <div className="message">
+                    //         <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
+                    //         <p>You Win! Attempts: {attempts}</p>
+                    //     </div>
+                    // </div>
+                    <div>
+                        <Modal title={
+                            <><br />
+                                <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
+                                You Win! Attempts: <span style={{ color: '#52c41a' }}>{attempts}</span>
+                            </>
+                        }
+                            footer={null}
+                            open={true}
+                            width={250}
+                            onCancel={handleCloseWinDialog}
+                            style={{ top: "30%" }}
+
+                        >
+
+                            <div className="pattern-div" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                {rows.map((row, rowIndex) => (
+                                    <div key={rowIndex} style={{ display: "flex", alignItems: "center" }}>
+                                        {row.map((box, boxIndex) => (
+                                            < div key={boxIndex} style={{
+                                                width: 15,
+                                                height: 15,
+                                                color: box.color === "vowel" ? "lightslategrey" : box.color || "lightslategrey",
+                                                margin: 0
+                                            }}
+                                                onClick={() => console.log(box.color)}>■</div>
+
+
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </Modal>
+
+
+
                     </div>
                 )}
-            </div>
+                {visible && (
+
+                    <div>
+                        <Modal
+
+                            footer={null}
+                            open={visible}
+                            onOk={handleOk}
+                            onCancel={handleCancel}
+                        >
+                            <h2>How to Play?</h2>
+
+                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                <p>As given below, the game is to guess a word with one vowel <span style={{ fontWeight: "bold" }}>A</span> at second position</p>
+                                <div className="instruction_word_input">
+
+                                    <span> </span>
+                                    <span>A</span>
+                                    <span> </span>
+                                    <span> </span>
+                                    <span> </span>
+
+                                </div>
+                                <p>Suppose you guess <span style={{ fontWeight: "bold" }}>PARTY</span> as the word</p>
+                                <div className="instruction_word_guess">
+
+                                    <span>P</span>
+                                    <span>A</span>
+                                    <span>R</span>
+                                    <span>T</span>
+                                    <span>Y</span>
+
+                                </div>
+
+                                <div className="instuction_word_guess_desc" style={{ display: "table", margin: "2px" }}>
+                                    <div style={{ display: "table-row", margin: "2px" }}>
+                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-yellow)", color: "white" }}>P</span>
+                                        <p style={{ marginLeft: "5px" }}>Yellow means letter is present somewhere else in the answer word</p>
+                                    </div>
+                                    <div style={{ display: "table-row", margin: "2px" }}>
+                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-vowel)", color: "white" }}>A</span>
+                                        <p style={{ marginLeft: "5px" }}>Grey represents vower which are prefilled</p>
+                                    </div>
+                                    <div style={{ display: "table-row", margin: "2px" }}>
+                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-red)", color: "white" }}>R</span>
+                                        <p style={{ marginLeft: "5px" }}>Red means letter is not present in the answer word</p>
+                                    </div>
+                                    <div style={{ display: "table-row", margin: "2px" }}>
+                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-red)", color: "white" }}>T</span>
+                                        <p style={{ marginLeft: "5px" }}>Red means letter is not present in the answer word</p>
+                                    </div>
+                                    <div style={{ display: "table-row", margin: "2px" }}>
+                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-green)", color: "white" }}>Y</span>
+                                        <p style={{ marginLeft: "5px" }}>Green means letter is present at correct position in the answer word</p>
+                                    </div>
+                                </div>
+
+
+                                <p>Answer is <span style={{ fontWeight: "bold" }}>HAPPY</span></p>
+                                <div className="instruction_word_answer">
+
+                                    <span>H</span>
+                                    <span>A</span>
+                                    <span>P</span>
+                                    <span>P</span>
+                                    <span>Y</span>
+
+                                </div>
+
+                            </div>
+                        </Modal>
+                    </div>
+                )
+                }
+
+                {visibleAbout && (
+
+                    <div>
+                        <Modal
+
+                            footer={null}
+                            open={visibleAbout}
+                            onOk={handleAboutCancel}
+                            onCancel={handleAboutCancel}
+                        >
+                            <h2>About</h2>
+
+
+                        </Modal>
+                    </div>
+                )}
+
+
+            </div >
         </div >
     );
 };

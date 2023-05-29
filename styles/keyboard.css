@@ -76,13 +76,6 @@ html {
     /* Add this line to set the top position */
 }
 
-@media screen and (max-width: 768px) {
-    .box-container {
-        max-height: calc(100vh - 350px);
-        /* Adjust the max-height for mobile devices */
-    }
-}
-
 .box {
     display: inline-flex;
     justify-content: center;
@@ -192,14 +185,6 @@ html {
     cursor: pointer;
 }
 
-/* Add this media query for mobile devices */
-@media screen and (max-width: 768px) {
-    .close-button {
-        font-size: 1.5rem;
-        /* Increase the font size for mobile devices */
-    }
-}
-
 .key-green {
     background-color: var(--color-green) !important;
     color: white !important;
@@ -300,4 +285,270 @@ h1 span:nth-child(7) {
 h1 span:nth-child(8) {
     background-color: var(--color-red) !important;
     color: white !important;
+}
+
+/* Position and sizing of burger button */
+.bm-burger-button {
+    position: fixed;
+    width: 20px;
+    height: 15px;
+    left: 26px;
+    top: 26px;
+}
+
+/* Color/shape of burger icon bars */
+.bm-burger-bars {
+    background: #373a47;
+}
+
+/* Color/shape of burger icon bars on hover*/
+.bm-burger-bars-hover {
+    background: #a90000;
+}
+
+/* Position and sizing of clickable cross button */
+.bm-cross-button {
+    height: 24px;
+    width: 24px;
+}
+
+/* Color/shape of close button cross */
+.bm-cross {
+    background: #bdc3c7;
+}
+
+/*
+  Sidebar wrapper styles
+  Note: Beware of modifying this element as it can break the animations - you should not need to touch it in most cases
+  */
+.bm-menu-wrap {
+    position: fixed;
+    height: 100%;
+}
+
+/* General sidebar styles */
+.bm-menu {
+    background: #373a47;
+    opacity: 0.9;
+    padding: 2.5em 1.5em 0;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.bm-menu a {
+    color: rgb(214, 212, 212);
+}
+
+.bm-menu a:hover,
+.bm-menu a:focus {
+    color: var(--color-yellow);
+}
+
+.bm-menu a:nth-child(1):hover {
+    color: var(--color-red);
+}
+
+.bm-menu a:nth-child(2):hover {
+    color: var(--color-green);
+}
+
+.bm-menu a:nth-child(3):hover {
+    color: var(--color-red);
+}
+
+.bm-menu a:nth-child(4):hover {
+    color: var(--color-green);
+}
+
+.bm-item-list a {
+    padding: 0.8em;
+}
+
+.bm-item-list a span {
+    margin-left: 10px;
+    font-weight: 700;
+}
+
+
+.bm-item:focus {
+    outline: none;
+}
+
+/* Morph shape necessary with bubble or elastic */
+.bm-morph-shape {
+    fill: #373a47;
+}
+
+
+/* Wrapper for item list */
+.bm-item-list {
+    color: #b8b7ad;
+    padding: 0.8em;
+}
+
+/* Individual item */
+.bm-item {
+    display: inline-block;
+    font-family: Arial, sans-serif;
+}
+
+/* Styling of overlay */
+.bm-overlay {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Add this media query for mobile devices */
+@media screen and (max-width: 768px) {
+    .close-button {
+        font-size: 1.5rem;
+        /* Increase the font size for mobile devices */
+    }
+
+    .box-container {
+        max-height: calc(100vh - 350px);
+        /* Adjust the max-height for mobile devices */
+    }
+
+    .bm-burger-button {
+        left: 10px;
+        top: 30px;
+        transform: translateY(-50%);
+    }
+
+    h1 span {
+        width: 30px;
+        height: 30px;
+        font-size: 1.5rem;
+    }
+
+}
+
+.instruction_word_input {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.instruction_word_input span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid #ccc;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+.instruction_word_input span:nth-child(2) {
+    background-color: var(--color-vowel) !important;
+    color: white !important;
+}
+
+.instruction_word_guess {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.instruction_word_guess span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid #ccc;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+
+.instuction_word_guess_desc span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid #ccc;
+    width: 30px;
+    height: 30px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+
+.instruction_word_answer {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.instruction_word_answer span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid #ccc;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(1) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(2) {
+    background-color: var(--color-vowel) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(3) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(4) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(5) {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+.table-container {
+    display: table;
+}
+
+.table-row {
+    display: table-row;
+}
+
+.table-cell {
+    display: table-cell;
+    padding: 5px;
 }
