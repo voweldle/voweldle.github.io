@@ -556,6 +556,55 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
         };
     }, [handleKeyDown]);
 
+    // Function to convert rows into a text representation for sharing.
+    // The text representation is a string with each row separated by a newline.
+    // Each row is a sequence of boxes without any separators. The boxes are
+    // colored according to the color of the letter in the box. We use the unicode
+    // 🟩, 🟥, 🟨, ⬛, ⬜ for the boxes.
+    const rowsToText = (rows: { letter: string; color: string }[][]) => {
+        return rows.map((row) => {
+            return row
+                .map((item) => {
+                    if (item.color === "green") {
+                        return "🟩";
+                    } else if (item.color === "red") {
+                        return "🟥";
+                    } else if (item.color === "yellow") {
+                        return "🟨";
+                    } else if (item.color === "black") {
+                        return "⬛";
+                    } else {
+                        return "⬜";
+                    }
+                })
+                .join("");
+        }).join("\n");
+    };
+
+    const handleShare = async (numberOfGuesses: number, pattern: string) => {
+        const shareData = {
+            title: 'Voweldle',
+            text: `Voweldle in ${numberOfGuesses} attempts.\n\n${pattern}`,
+            url: 'https://voweldle.github.io',
+        }
+
+        try {
+            await navigator.share(shareData)
+        } catch (err) {
+            console.error('Sharing failed', err);
+            if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
+                    alert("Share data has been copied to the clipboard");
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            } else {
+                console.log('Clipboard API not available');
+            }
+        }
+    }
+
     return (
 
         <div>
@@ -672,6 +721,10 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                                         ))}
                                     </div>
                                 ))}
+                            </div>
+
+                            <div>
+                                <button className="share-button" onClick={() => handleShare(attempts, rowsToText(rows))}>Share</button>
                             </div>
                         </Modal>
 
