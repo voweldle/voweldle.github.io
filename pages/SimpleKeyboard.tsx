@@ -582,6 +582,55 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
         };
     }, [handleKeyDown]);
 
+    // Function to convert rows into a text representation for sharing.
+    // The text representation is a string with each row separated by a newline.
+    // Each row is a sequence of boxes without any separators. The boxes are
+    // colored according to the color of the letter in the box. We use the unicode
+    // 🟩, 🟥, 🟨, ⬛, ⬜ for the boxes.
+    const rowsToText = (rows: { letter: string; color: string }[][]) => {
+        return rows.map((row) => {
+            return row
+                .map((item) => {
+                    if (item.color === "green") {
+                        return "🟩";
+                    } else if (item.color === "red") {
+                        return "🟥";
+                    } else if (item.color === "yellow") {
+                        return "🟨";
+                    } else if (item.color === "black") {
+                        return "⬛";
+                    } else {
+                        return "⬜";
+                    }
+                })
+                .join("");
+        }).join("\n");
+    };
+
+    const handleShare = async (numberOfGuesses: number, pattern: string) => {
+        const shareData = {
+            title: 'Voweldle',
+            text: `Voweldle in ${numberOfGuesses} attempts.\n\n${pattern}`,
+            url: 'https://voweldle.github.io',
+        }
+
+        try {
+            await navigator.share(shareData)
+        } catch (err) {
+            console.error('Sharing failed', err);
+            if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
+                    alert("Share data has been copied to the clipboard");
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            } else {
+                console.log('Clipboard API not available');
+            }
+        }
+    }
+
     return (
 
         <div>
@@ -701,6 +750,10 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                                     </div>
                                 ))}
                             </div>
+
+                            <div>
+                                <button className="share-button" onClick={() => handleShare(attempts, rowsToText(rows))}>Share</button>
+                            </div>
                         </Modal>
 
 
@@ -741,26 +794,26 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
 
                                 </div>
 
-                                <div className="instuction_word_guess_desc" style={{ display: "table", margin: "2px" }}>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-yellow)", color: "white" }}>P</span>
-                                        <p style={{ marginLeft: "5px" }}>Yellow means letter is present somewhere else in the answer word</p>
+                                <div className="instruction_word_guess_desc">
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-yellow)", color: "white" }}>P</div>
+                                        <p>Yellow means letter is present somewhere else in the answer word</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-vowel)", color: "white" }}>A</span>
-                                        <p style={{ marginLeft: "5px" }}>Grey represents vower which are prefilled</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-vowel)", color: "white" }}>A</div>
+                                        <p>Grey represents vowel which are prefilled</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-red)", color: "white" }}>R</span>
-                                        <p style={{ marginLeft: "5px" }}>Red means letter is not present in the answer word</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-red)", color: "white" }}>R</div>
+                                        <p>Red means letter is not present in the answer word</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-red)", color: "white" }}>T</span>
-                                        <p style={{ marginLeft: "5px" }}>Red means letter is not present in the answer word</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-red)", color: "white" }}>T</div>
+                                        <p>Red means letter is not present in the answer word</p>
                                     </div>
-                                    <div style={{ display: "table-row", margin: "2px" }}>
-                                        <span style={{ verticalAlign: "middle", textAlign: "center", display: "table-cell", backgroundColor: "var(--color-green)", color: "white" }}>Y</span>
-                                        <p style={{ marginLeft: "5px" }}>Green means letter is present at correct position in the answer word</p>
+                                    <div className="instruction_word_guess_desc_row">
+                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-green)", color: "white" }}>Y</div>
+                                        <p>Green means letter is present at correct position in the answer word</p>
                                     </div>
                                 </div>
 
@@ -786,15 +839,25 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
 
                     <div className="modal-container">
                         <Modal
-
+                            className="about-dialog-modal"
                             footer={null}
                             open={visibleAbout}
                             onOk={handleAboutCancel}
                             onCancel={handleAboutCancel}
                         >
-                            <h2>About</h2>
-
-
+                            <h2 className="about-dialog-title">About</h2>
+                            <p className="about-dialog-text">
+                                Voweldle is a word-guessing game where you are given the vowels
+                                and need to guess the consonants of a word in as few moves as possible.
+                                This game is inspired by the games <a className="about-dialog-link" href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer">Wordle</a> and its Hindi counterpart <a className="about-dialog-link" href="https://kach.github.io/shabdle/" target="_blank" rel="noopener noreferrer">Shabdle</a>.
+                            </p>
+                            <br />
+                            <p className="about-dialog-text">This game is developed by Shivani Charkha and Shubham Chandak, with the aid of GitHub Copilot and ChatGPT.
+                                You can find the <a className="about-dialog-link" href="https://github.com/voweldle/voweldle.github.io" target="_blank" rel="noopener noreferrer">source code on GitHub</a> and leave
+                                any comments/issues there.
+                            </p>
+                            <br />
+                            <p>Enjoy 😊</p>
                         </Modal>
                     </div>
                 )}

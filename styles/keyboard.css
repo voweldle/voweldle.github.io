@@ -482,22 +482,6 @@ h1 span:nth-child(8) {
     font-weight: bold;
 }
 
-
-.instuction_word_guess_desc span {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    border: 1.5px solid #ccc;
-    width: 30px;
-    height: 30px;
-    margin-right: 1px;
-    color: black;
-    background-color: white;
-    align-self: center;
-    font-weight: bold;
-}
-
-
 .instruction_word_answer {
     font-size: 2rem;
     font-family: Arial, sans-serif;
@@ -582,4 +566,49 @@ h1 span:nth-child(8) {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 200;
+}
+
+.instruction_word_guess_desc {
+    padding: 2px;
+}
+
+.instruction_word_guess_desc_row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.instruction_word_guess_desc_box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    aspect-ratio: 1 / 1;
+    margin-right: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 1.5px solid #ccc;
+}
+
+.instruction_word_guess_desc_row p {
+    margin: 0;
+}
+
+.about-dialog-modal {
+    padding: 15px;
+}
+
+.about-dialog-title {
+    margin-bottom: 20px;
+}
+
+.about-dialog-text {
+    text-align: justify;
+}
+
+.about-dialog-link {
+    color: #1890ff;
+    text-decoration: underline;
 }
