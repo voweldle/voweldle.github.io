@@ -756,19 +756,27 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
 
                 {visibleAbout && (
 
-                    <div>
-                        <Modal
-
-                            footer={null}
-                            open={visibleAbout}
-                            onOk={handleAboutCancel}
-                            onCancel={handleAboutCancel}
-                        >
-                            <h2>About</h2>
-
-
-                        </Modal>
-                    </div>
+                    <Modal
+                        className="about-dialog-modal"
+                        footer={null}
+                        open={visibleAbout}
+                        onOk={handleAboutCancel}
+                        onCancel={handleAboutCancel}
+                    >
+                        <h2 className="about-dialog-title">About</h2>
+                        <p className="about-dialog-text">
+                            Voweldle is a word-guessing game where you are given the vowels
+                            and need to guess the consonants of a word in as few moves as possible.
+                            This game is inspired by the games <a className="about-dialog-link" href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer">Wordle</a> and its Hindi counterpart <a className="about-dialog-link" href="https://kach.github.io/shabdle/" target="_blank" rel="noopener noreferrer">Shabdle</a>.
+                        </p>
+                        <br />
+                        <p className="about-dialog-text">This game is developed by Shivani Charkha and Shubham Chandak, with the aid of GitHub Copilot and ChatGPT.
+                            You can find the <a className="about-dialog-link" href="https://github.com/voweldle/voweldle.github.io" target="_blank" rel="noopener noreferrer">source code on GitHub</a> and leave
+                            any comments/issues there.
+                        </p>
+                        <br />
+                        <p>Enjoy 😊</p>
+                    </Modal>
                 )}
 
 

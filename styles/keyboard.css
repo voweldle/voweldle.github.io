@@ -572,3 +572,20 @@ h1 span:nth-child(8) {
 .instruction_word_guess_desc_row p {
     margin: 0;
 }
+
+.about-dialog-modal {
+    padding: 15px;
+}
+
+.about-dialog-title {
+    margin-bottom: 20px;
+}
+
+.about-dialog-text {
+    text-align: justify;
+}
+
+.about-dialog-link {
+    color: #1890ff;
+    text-decoration: underline;
+}
