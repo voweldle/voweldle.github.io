@@ -60,10 +60,15 @@ const isVowel = (char: string) => {
 
 const LETTERS = "QWERTYUIOPASDFGHJKLZXCVBNM";
 
+const TOO_FEW_LETTERS_MESSAGE = "Too few letters!";
+const COPIED_TO_CLIPBOARD_MESSAGE = "Copied to the clipboard!";
+
 export default function SimpleKeyboard(props: KeyboardComponentProps) {
     const keyboard = useRef<any | null>(null);
 
-    const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
+    const [showAutoDisappearingDialog, setShowAutoDisappearingDialog] = useState(false);
+    // useRef for autodisappearing dialog box message 
+    const autoDisappearingDialogBoxMessage = useRef<string>("");
     const [showWinDialog, setShowWinDialog] = useState(false);
 
     const [typedLetters, setTypedLetters] = useState<string[]>([]);
@@ -402,16 +407,13 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     function AutoDisappearingDialogBox({ message, timeout = 3000 }: { message: string, timeout?: number }) {
         useEffect(() => {
             const timer = setTimeout(() => {
-                setShowTooFewLettersDialog(false);
+                setShowAutoDisappearingDialog(false);
             }, timeout);
 
             return () => clearTimeout(timer);
         }, [timeout]);
 
-        return showTooFewLettersDialog ? (
-            // <div className="dialog-box">
-            //     <div className="message">{message}</div>
-            // </div>
+        return showAutoDisappearingDialog ? (
             <div>
                 <Modal
                     open={true}
@@ -419,12 +421,9 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                     width={150}
                     closable={false}
                 >
-
-                    <p>{message}</p>
-
-
+                    <p style={{ textAlign: 'center' }}>{message}</p>
                 </Modal>
-            </div>
+            </ div>
         ) : null;
     }
 
@@ -545,7 +544,8 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                     }
                 }); // save the word to local storage
             } else {
-                setShowTooFewLettersDialog(true);
+                autoDisappearingDialogBoxMessage.current = TOO_FEW_LETTERS_MESSAGE;
+                setShowAutoDisappearingDialog(true);
             }
         } else {
             if (typedLetters.length < numLetters) {
@@ -620,8 +620,9 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
             console.error('Sharing failed', err);
             if (navigator.clipboard) {
                 try {
-                    await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
-                    alert("Share data has been copied to the clipboard");
+                    await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+                    autoDisappearingDialogBoxMessage.current = COPIED_TO_CLIPBOARD_MESSAGE;
+                    setShowAutoDisappearingDialog(true);
                 } catch (err) {
                     console.error('Failed to copy text: ', err);
                 }
@@ -709,20 +710,14 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
             </div>
 
             <div className="dialog-box-wrapper">
-                <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />
+                <AutoDisappearingDialogBox message={autoDisappearingDialogBoxMessage.current} timeout={1000} />
 
                 {showWinDialog && (
-                    // <div className="win-dialog-box">
-                    //     <div className="message">
-                    //         <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
-                    //         <p>You Win! Attempts: {attempts}</p>
-                    //     </div>
-                    // </div>
                     <div className="modal-container">
                         <Modal title={
                             <><br />
-                                <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                                You Win! Attempts: <span style={{ color: '#52c41a' }}>{attempts}</span>
+                                <CheckCircleOutlined style={{ color: '#45a049;', marginRight: '8px' }} />
+                                You Win! Attempts: <span style={{ color: '#45a049;' }}>{attempts}</span>
                             </>
                         }
                             footer={null}
@@ -733,25 +728,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
 
                         >
 
-                            <div className="pattern-div" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                {rows.map((row, rowIndex) => (
-                                    <div key={rowIndex} style={{ display: "flex", alignItems: "center" }}>
-                                        {row.map((box, boxIndex) => (
-                                            < div key={boxIndex} style={{
-                                                width: 15,
-                                                height: 15,
-                                                color: box.color === "vowel" ? "lightslategrey" : box.color || "lightslategrey",
-                                                margin: 0
-                                            }}
-                                                onClick={() => console.log(box.color)}>■</div>
-
-
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div>
+                            <div className="share-button-parent">
                                 <button className="share-button" onClick={() => handleShare(attempts, rowsToText(rows))}>Share</button>
                             </div>
                         </Modal>

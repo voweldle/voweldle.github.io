@@ -612,3 +612,31 @@ h1 span:nth-child(8) {
     color: #1890ff;
     text-decoration: underline;
 }
+
+.share-button {
+    background-color: #4CAF50;
+    /* Set the background color */
+    color: white;
+    /* Set the text color */
+    padding: 10px 20px;
+    /* Add some padding */
+    border: none;
+    /* Remove the default border */
+    border-radius: 4px;
+    /* Add rounded corners */
+    cursor: pointer;
+    /* Change the cursor style */
+    font-size: 16px;
+    /* Adjust the font size */
+}
+
+.share-button:hover {
+    background-color: #45a049;
+    /* Change the background color on hover */
+}
+
+.share-button-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
