@@ -560,3 +560,26 @@ h1 span:nth-child(8) {
     display: table-cell;
     padding: 5px;
 }
+
+.menu-item:hover {
+    cursor: pointer;
+    /* Replace 'pointer' with the desired cursor style */
+}
+
+.sidebar-container {
+    position: relative;
+    z-index: 1;
+}
+
+.top-container {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 200;
+}

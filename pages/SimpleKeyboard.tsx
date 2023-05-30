@@ -46,6 +46,10 @@ interface GameData {
     schemaVersion: string;
 }
 
+interface SideBarState {
+    isOpen: boolean;
+}
+
 
 const VOWEL_STYLE = "vowel";
 
@@ -74,6 +78,15 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     const [numLetters, setNumLetters] = useState(0);
     const [buttonTheme, setButtonTheme] = useState<{ class: string; buttons: string; }[]>([]);
     const [visible, setVisible] = useState(false);
+    const [isSideBarOpen, setSideBarOpen] = useState(false)
+
+    const handleSideBarStateChange = (state: SideBarState) => {
+        setSideBarOpen(state.isOpen);
+    };
+
+    const closeSideBar = () => {
+        setSideBarOpen(false)
+    }
 
     const showHelpDialog = () => {
         setVisible(true);
@@ -396,8 +409,21 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
         }, [timeout]);
 
         return showTooFewLettersDialog ? (
-            <div className="dialog-box">
-                <div className="message">{message}</div>
+            // <div className="dialog-box">
+            //     <div className="message">{message}</div>
+            // </div>
+            <div>
+                <Modal
+                    open={true}
+                    footer={null}
+                    width={150}
+                    closable={false}
+                >
+
+                    <p>{message}</p>
+
+
+                </Modal>
             </div>
         ) : null;
     }
@@ -567,11 +593,13 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
             </Head>
 
             <div className="top-container">
-                <Menu width={'200px'}>
-                    <a id="home" className="menu-item" href="/">GAME</a>
-                    <a id="about" className="menu-item" onClick={showAboutDialog}>ABOUT</a>
-                    <a className="menu-item--small" onClick={showHelpDialog} >INSTRUCTIONS</a>
-                </Menu>
+                <div className="side-container">
+                    <Menu width={'200px'} isOpen={isSideBarOpen} onStateChange={handleSideBarStateChange}>
+                        {/* <a id="home" className="menu-item" href="/">GAME</a> */}
+                        <a id="about" className="menu-item" onClick={() => { showAboutDialog(); closeSideBar() }}>ABOUT</a>
+                        <a id="instructions" className="menu-item" onClick={() => { showHelpDialog(); closeSideBar() }} >INSTRUCTIONS</a>
+                    </Menu>
+                </div>
                 <div className="top-bar">
 
                     <h1>
@@ -641,7 +669,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                     //         <p>You Win! Attempts: {attempts}</p>
                     //     </div>
                     // </div>
-                    <div>
+                    <div className="modal-container">
                         <Modal title={
                             <><br />
                                 <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
@@ -681,7 +709,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                 )}
                 {visible && (
 
-                    <div>
+                    <div className="modal-container">
                         <Modal
 
                             footer={null}
@@ -756,7 +784,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
 
                 {visibleAbout && (
 
-                    <div>
+                    <div className="modal-container">
                         <Modal
 
                             footer={null}
