@@ -4,7 +4,6 @@ import "react-simple-keyboard/build/css/index.css";
 import initialData from './initial-local-storage.json';
 import seedrandom from "seedrandom";
 import Head from "next/head";
-import { slide as Menu } from 'react-burger-menu';
 import { Modal } from 'antd';
 import { CheckCircleOutlined } from '@ant-design/icons';
 
@@ -46,11 +45,6 @@ interface GameData {
     schemaVersion: string;
 }
 
-interface SideBarState {
-    isOpen: boolean;
-}
-
-
 const VOWEL_STYLE = "vowel";
 
 // function to return true if character is a vowel
@@ -63,7 +57,7 @@ const LETTERS = "QWERTYUIOPASDFGHJKLZXCVBNM";
 const TOO_FEW_LETTERS_MESSAGE = "Too few letters!";
 const COPIED_TO_CLIPBOARD_MESSAGE = "Copied to the clipboard!";
 
-export default function SimpleKeyboard(props: KeyboardComponentProps) {
+export default function Game(props: KeyboardComponentProps) {
     const keyboard = useRef<any | null>(null);
 
     const [showAutoDisappearingDialog, setShowAutoDisappearingDialog] = useState(false);
@@ -82,42 +76,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     const [initialWord, setInitialWord] = useState("");
     const [numLetters, setNumLetters] = useState(0);
     const [buttonTheme, setButtonTheme] = useState<{ class: string; buttons: string; }[]>([]);
-    const [visible, setVisible] = useState(false);
-    const [isSideBarOpen, setSideBarOpen] = useState(false)
 
-    const handleSideBarStateChange = (state: SideBarState) => {
-        setSideBarOpen(state.isOpen);
-    };
-
-    const closeSideBar = () => {
-        setSideBarOpen(false)
-    }
-
-    const showHelpDialog = () => {
-        setVisible(true);
-    };
-
-    const handleOk = () => {
-        setVisible(false);
-    };
-
-    const handleCancel = () => {
-        setVisible(false);
-    };
-
-    const [visibleAbout, setVisibleAbout] = useState(false);
-
-    const showAboutDialog = () => {
-        setVisibleAbout(true);
-    };
-
-    const handleAboutOk = () => {
-        setVisibleAbout(false);
-    };
-
-    const handleAboutCancel = () => {
-        setVisibleAbout(false);
-    };
     const boxContainerRef = useRef<HTMLDivElement>(null);
 
     // create key colors state, mapping letters to colors, initially setting
@@ -642,28 +601,6 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <div className="top-container">
-                <div className="side-container">
-                    <Menu width={'200px'} isOpen={isSideBarOpen} onStateChange={handleSideBarStateChange}>
-                        {/* <a id="home" className="menu-item" href="/">GAME</a> */}
-                        <a id="about" className="menu-item" onClick={() => { showAboutDialog(); closeSideBar() }}>ABOUT</a>
-                        <a id="instructions" className="menu-item" onClick={() => { showHelpDialog(); closeSideBar() }} >INSTRUCTIONS</a>
-                    </Menu>
-                </div>
-                <div className="top-bar">
-
-                    <h1>
-                        <span>V</span>
-                        <span>O</span>
-                        <span>W</span>
-                        <span>E</span>
-                        <span>L</span>
-                        <span>D</span>
-                        <span>L</span>
-                        <span>E</span>
-                    </h1>
-                </div>
-            </div>
             <div className="game-container">
                 <div className="box-container" ref={boxContainerRef} style={{ marginTop: "5.5rem" }}>
                     {rows.map((row, rowIndex) => (
@@ -732,114 +669,8 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                                 <button className="share-button" onClick={() => handleShare(attempts, rowsToText(rows))}>Share</button>
                             </div>
                         </Modal>
-
-
-
                     </div>
                 )}
-                {visible && (
-
-                    <div className="modal-container">
-                        <Modal
-
-                            footer={null}
-                            open={visible}
-                            onOk={handleOk}
-                            onCancel={handleCancel}
-                        >
-                            <h2>How to Play?</h2>
-
-                            <div style={{ display: "flex", flexDirection: "column" }}>
-                                <p>As given below, the game is to guess a word with one vowel <span style={{ fontWeight: "bold" }}>A</span> at second position</p>
-                                <div className="instruction_word_input">
-
-                                    <span> </span>
-                                    <span>A</span>
-                                    <span> </span>
-                                    <span> </span>
-                                    <span> </span>
-
-                                </div>
-                                <p>Suppose you guess <span style={{ fontWeight: "bold" }}>PARTY</span> as the word</p>
-                                <div className="instruction_word_guess">
-
-                                    <span>P</span>
-                                    <span>A</span>
-                                    <span>R</span>
-                                    <span>T</span>
-                                    <span>Y</span>
-
-                                </div>
-
-                                <div className="instruction_word_guess_desc">
-                                    <div className="instruction_word_guess_desc_row">
-                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-yellow)", color: "white" }}>P</div>
-                                        <p>Yellow means letter is present somewhere else in the answer word</p>
-                                    </div>
-                                    <div className="instruction_word_guess_desc_row">
-                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-vowel)", color: "white" }}>A</div>
-                                        <p>Grey represents vowel which are prefilled</p>
-                                    </div>
-                                    <div className="instruction_word_guess_desc_row">
-                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-red)", color: "white" }}>R</div>
-                                        <p>Red means letter is not present in the answer word</p>
-                                    </div>
-                                    <div className="instruction_word_guess_desc_row">
-                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-red)", color: "white" }}>T</div>
-                                        <p>Red means letter is not present in the answer word</p>
-                                    </div>
-                                    <div className="instruction_word_guess_desc_row">
-                                        <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-green)", color: "white" }}>Y</div>
-                                        <p>Green means letter is present at correct position in the answer word</p>
-                                    </div>
-                                </div>
-
-
-                                <p>Answer is <span style={{ fontWeight: "bold" }}>HAPPY</span></p>
-                                <div className="instruction_word_answer">
-
-                                    <span>H</span>
-                                    <span>A</span>
-                                    <span>P</span>
-                                    <span>P</span>
-                                    <span>Y</span>
-
-                                </div>
-
-                            </div>
-                        </Modal>
-                    </div>
-                )
-                }
-
-                {visibleAbout && (
-
-                    <div className="modal-container">
-                        <Modal
-                            className="about-dialog-modal"
-                            footer={null}
-                            open={visibleAbout}
-                            onOk={handleAboutCancel}
-                            onCancel={handleAboutCancel}
-                        >
-                            <h2 className="about-dialog-title">About</h2>
-                            <p className="about-dialog-text">
-                                Voweldle is a word-guessing game where you are given the vowels
-                                and need to guess the consonants of a word in as few moves as possible.
-                                This game is inspired by the games <a className="about-dialog-link" href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer">Wordle</a> and its Hindi counterpart <a className="about-dialog-link" href="https://kach.github.io/shabdle/" target="_blank" rel="noopener noreferrer">Shabdle</a>.
-                            </p>
-                            <br />
-                            <p className="about-dialog-text">This game is developed by Shivani Charkha and Shubham Chandak, with the aid of GitHub Copilot and ChatGPT.
-                                You can find the <a className="about-dialog-link" href="https://github.com/voweldle/voweldle.github.io" target="_blank" rel="noopener noreferrer">source code on GitHub</a> and leave
-                                any comments/issues there.
-                            </p>
-                            <br />
-                            <p>Enjoy 😊</p>
-                        </Modal>
-                    </div>
-                )}
-
-
             </div >
         </div >
     );

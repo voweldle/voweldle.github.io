@@ -1,8 +1,9 @@
 import React from 'react';
-import SimpleKeyboard from './SimpleKeyboard';
+import Game from './Game';
+import SideBar from './SideBar';
 
 const PracticePage: React.FC = () => {
-    return <SimpleKeyboard mode="practice" />;
+    return <div><SideBar /> <Game mode="practice" /></div>;
 };
 
 export default PracticePage;
