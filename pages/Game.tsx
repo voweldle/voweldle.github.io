@@ -120,7 +120,7 @@ export default function Game(props: KeyboardComponentProps) {
                 randomWord = words[randomIndex].toUpperCase();
             } else {
                 // Set the start date for your game
-                const startDate = new Date("2023-04-01");
+                const startDate = new Date("2023-06-01");
                 // Calculate the number of days elapsed since the start date
                 const today = new Date();
                 const elapsedDays = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
