@@ -1,0 +1,642 @@
+:root {
+    --color-green: rgb(90, 161, 90);
+    --color-red: rgba(221, 48, 65, 0.833);
+    --color-vowel: lightslategray;
+    --color-black: rgb(35, 33, 35);
+    --color-yellow: rgba(230, 180, 17, 0.8);
+}
+
+body,
+html {
+    height: 100%;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 5px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    background-color: #f8f8f8;
+    color: black;
+    border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.virtual-keyboard {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.virtual-keyboard .simple-keyboard .hg-row:nth-child(2) {
+    margin-left: 4%;
+    margin-right: 4%;
+}
+
+/* enter key */
+.virtual-keyboard .simple-keyboard .hg-row:nth-child(3) .hg-button:first-child {
+    width: 35px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* backspace key */
+.virtual-keyboard .simple-keyboard .hg-row:nth-child(3) .hg-button:last-child {
+    width: 35px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+@media screen and (max-width: 768px) {
+    .virtual-keyboard .simple-keyboard .hg-row:nth-child(3) .hg-button:last-child {
+        font-size: 1.8rem;
+        font-family: "Symbol", Arial, sans-serif;
+        font-weight: normal;
+    }
+}
+
+.box-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 750px;
+    margin-bottom: 5px;
+    justify-content: center;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 250px);
+    /* Adjust this value based on the height of the virtual keyboard */
+    margin-top: 10px;
+    position: fixed;
+    /* Add this line to pin the box-container to the top */
+    top: 0;
+    /* Add this line to set the top position */
+}
+
+.box {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ccc;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+.box.green {
+    background-color: var(--color-green);
+    color: white;
+}
+
+.box.yellow {
+    background-color: var(--color-yellow);
+    color: white;
+}
+
+.box.red {
+    background-color: var(--color-red);
+    color: white;
+}
+
+.box.black {
+    background-color: var(--color-black);
+    color: white;
+}
+
+.box.vowel {
+    background-color: var(--color-vowel);
+    color: white;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    margin-bottom: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-box-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    pointer-events: none;
+    /* Allow clicks to go through */
+}
+
+.dialog-box,
+.win-dialog-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    /* Add the
+    font-family property */
+    font-size: 20px;
+    /* Add the font-size property */
+    z-index: 100;
+    pointer-events: auto;
+    /* clicks go through */
+}
+
+.dialog-box {
+    margin: 10px 0;
+    padding: 10px;
+    border: 2px solid #333;
+    background-color: #eee;
+    color: #333;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.win-dialog-box {
+    position: relative;
+    border: 2px solid #333;
+    background-color: #eee;
+    color: #333;
+    text-align: center;
+    border-radius: 5px;
+    min-height: 100px;
+    min-width: 250px;
+}
+
+.close-button {
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    font-size: 1.0rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.key-green {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+
+.key-yellow {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+.key-red {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+.key-vowel {
+    background-color: var(--color-vowel) !important;
+    color: white !important;
+}
+
+.key-none {
+    background-color: white !important;
+    color: black !important;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    color: rgb(var(--foreground-rgb));
+    padding: 2rem 4rem;
+    position: relative;
+}
+
+h1 {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+h1 span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid white;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+h1 span:nth-child(1) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(2) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(3) {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(4) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(5) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(6) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(7) {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+h1 span:nth-child(8) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+/* Position and sizing of burger button */
+.bm-burger-button {
+    position: fixed;
+    width: 20px;
+    height: 15px;
+    left: 26px;
+    top: 26px;
+}
+
+/* Color/shape of burger icon bars */
+.bm-burger-bars {
+    background: #373a47;
+}
+
+/* Color/shape of burger icon bars on hover*/
+.bm-burger-bars-hover {
+    background: #a90000;
+}
+
+/* Position and sizing of clickable cross button */
+.bm-cross-button {
+    height: 24px;
+    width: 24px;
+}
+
+/* Color/shape of close button cross */
+.bm-cross {
+    background: #bdc3c7;
+}
+
+/*
+  Sidebar wrapper styles
+  Note: Beware of modifying this element as it can break the animations - you should not need to touch it in most cases
+  */
+.bm-menu-wrap {
+    position: fixed;
+    height: 100%;
+}
+
+/* General sidebar styles */
+.bm-menu {
+    background: #373a47;
+    opacity: 0.9;
+    padding: 2.5em 1.5em 0;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.bm-menu a {
+    color: rgb(214, 212, 212);
+}
+
+.bm-menu a:hover,
+.bm-menu a:focus {
+    color: var(--color-yellow);
+}
+
+.bm-menu a:nth-child(1):hover {
+    color: var(--color-red);
+}
+
+.bm-menu a:nth-child(2):hover {
+    color: var(--color-green);
+}
+
+.bm-menu a:nth-child(3):hover {
+    color: var(--color-red);
+}
+
+.bm-menu a:nth-child(4):hover {
+    color: var(--color-green);
+}
+
+.bm-item-list a {
+    padding: 0.8em;
+}
+
+.bm-item-list a span {
+    margin-left: 10px;
+    font-weight: 700;
+}
+
+
+.bm-item:focus {
+    outline: none;
+}
+
+/* Morph shape necessary with bubble or elastic */
+.bm-morph-shape {
+    fill: #373a47;
+}
+
+
+/* Wrapper for item list */
+.bm-item-list {
+    color: #b8b7ad;
+    padding: 0.8em;
+}
+
+/* Individual item */
+.bm-item {
+    display: inline-block;
+    font-family: Arial, sans-serif;
+}
+
+/* Styling of overlay */
+.bm-overlay {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Add this media query for mobile devices */
+@media screen and (max-width: 768px) {
+    .close-button {
+        font-size: 1.5rem;
+        /* Increase the font size for mobile devices */
+    }
+
+    .box-container {
+        max-height: calc(100vh - 350px);
+        /* Adjust the max-height for mobile devices */
+    }
+
+    .bm-burger-button {
+        left: 10px;
+        top: 30px;
+        transform: translateY(-50%);
+    }
+
+    h1 span {
+        width: 30px;
+        height: 30px;
+        font-size: 1.5rem;
+    }
+
+}
+
+.instruction_word_input {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.instruction_word_input span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid #ccc;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+.instruction_word_input span:nth-child(2) {
+    background-color: var(--color-vowel) !important;
+    color: white !important;
+}
+
+.instruction_word_guess {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.instruction_word_guess span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid #ccc;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+}
+
+.instruction_word_answer {
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.instruction_word_answer span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1.5px solid #ccc;
+    width: 40px;
+    height: 40px;
+    margin-right: 1px;
+    color: black;
+    background-color: white;
+    align-self: center;
+    font-weight: bold;
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(1) {
+    background-color: var(--color-yellow) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(2) {
+    background-color: var(--color-vowel) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(3) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(4) {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+.instruction_word_guess span:nth-child(5) {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+.table-container {
+    display: table;
+}
+
+.table-row {
+    display: table-row;
+}
+
+.table-cell {
+    display: table-cell;
+    padding: 5px;
+}
+
+.menu-item:hover {
+    cursor: pointer;
+    /* Replace 'pointer' with the desired cursor style */
+}
+
+.sidebar-container {
+    position: relative;
+    z-index: 1;
+}
+
+.top-container {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 200;
+}
+
+.instruction_word_guess_desc {
+    padding: 2px;
+}
+
+.instruction_word_guess_desc_row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.instruction_word_guess_desc_box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    aspect-ratio: 1 / 1;
+    margin-right: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 1.5px solid #ccc;
+}
+
+.instruction_word_guess_desc_row p {
+    margin: 0;
+}
+
+.about-dialog-modal {
+    padding: 15px;
+}
+
+.about-dialog-title {
+    margin-bottom: 20px;
+}
+
+.about-dialog-text {
+    text-align: justify;
+}
+
+.about-dialog-link {
+    color: #1890ff;
+    text-decoration: underline;
+}
+
+.share-button {
+    background-color: #4CAF50;
+    /* Set the background color */
+    color: white;
+    /* Set the text color */
+    padding: 10px 20px;
+    /* Add some padding */
+    border: none;
+    /* Remove the default border */
+    border-radius: 4px;
+    /* Add rounded corners */
+    cursor: pointer;
+    /* Change the cursor style */
+    font-size: 16px;
+    /* Adjust the font size */
+}
+
+.share-button:hover {
+    background-color: #45a049;
+    /* Change the background color on hover */
+}
+
+.share-button-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

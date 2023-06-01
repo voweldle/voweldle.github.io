@@ -3,6 +3,10 @@ import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import initialData from './initial-local-storage.json';
 import seedrandom from "seedrandom";
+import Head from "next/head";
+import { Modal } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
+
 
 interface KeyboardComponentProps {
     mode: string;
@@ -41,7 +45,6 @@ interface GameData {
     schemaVersion: string;
 }
 
-
 const VOWEL_STYLE = "vowel";
 
 // function to return true if character is a vowel
@@ -51,10 +54,15 @@ const isVowel = (char: string) => {
 
 const LETTERS = "QWERTYUIOPASDFGHJKLZXCVBNM";
 
-export default function SimpleKeyboard(props: KeyboardComponentProps) {
+const TOO_FEW_LETTERS_MESSAGE = "Too few letters!";
+const COPIED_TO_CLIPBOARD_MESSAGE = "Copied to the clipboard!";
+
+export default function Game(props: KeyboardComponentProps) {
     const keyboard = useRef<any | null>(null);
 
-    const [showTooFewLettersDialog, setShowTooFewLettersDialog] = useState(false);
+    const [showAutoDisappearingDialog, setShowAutoDisappearingDialog] = useState(false);
+    // useRef for autodisappearing dialog box message 
+    const autoDisappearingDialogBoxMessage = useRef<string>("");
     const [showWinDialog, setShowWinDialog] = useState(false);
 
     const [typedLetters, setTypedLetters] = useState<string[]>([]);
@@ -68,6 +76,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     const [initialWord, setInitialWord] = useState("");
     const [numLetters, setNumLetters] = useState(0);
     const [buttonTheme, setButtonTheme] = useState<{ class: string; buttons: string; }[]>([]);
+
     const boxContainerRef = useRef<HTMLDivElement>(null);
 
     // create key colors state, mapping letters to colors, initially setting
@@ -111,7 +120,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                 randomWord = words[randomIndex].toUpperCase();
             } else {
                 // Set the start date for your game
-                const startDate = new Date("2023-04-01");
+                const startDate = new Date("2023-06-01");
                 // Calculate the number of days elapsed since the start date
                 const today = new Date();
                 const elapsedDays = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -357,16 +366,23 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     function AutoDisappearingDialogBox({ message, timeout = 3000 }: { message: string, timeout?: number }) {
         useEffect(() => {
             const timer = setTimeout(() => {
-                setShowTooFewLettersDialog(false);
+                setShowAutoDisappearingDialog(false);
             }, timeout);
 
             return () => clearTimeout(timer);
         }, [timeout]);
 
-        return showTooFewLettersDialog ? (
-            <div className="dialog-box">
-                <div className="message">{message}</div>
-            </div>
+        return showAutoDisappearingDialog ? (
+            <div>
+                <Modal
+                    open={true}
+                    footer={null}
+                    width={150}
+                    closable={false}
+                >
+                    <p style={{ textAlign: 'center' }}>{message}</p>
+                </Modal>
+            </ div>
         ) : null;
     }
 
@@ -487,7 +503,8 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
                     }
                 }); // save the word to local storage
             } else {
-                setShowTooFewLettersDialog(true);
+                autoDisappearingDialogBoxMessage.current = TOO_FEW_LETTERS_MESSAGE;
+                setShowAutoDisappearingDialog(true);
             }
         } else {
             if (typedLetters.length < numLetters) {
@@ -524,21 +541,65 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
         };
     }, [handleKeyDown]);
 
+    // Function to convert rows into a text representation for sharing.
+    // The text representation is a string with each row separated by a newline.
+    // Each row is a sequence of boxes without any separators. The boxes are
+    // colored according to the color of the letter in the box. We use the unicode
+    // 🟩, 🟥, 🟨, ⬛, ⬜ for the boxes.
+    const rowsToText = (rows: { letter: string; color: string }[][]) => {
+        return rows.map((row) => {
+            return row
+                .map((item) => {
+                    if (item.color === "green") {
+                        return "🟩";
+                    } else if (item.color === "red") {
+                        return "🟥";
+                    } else if (item.color === "yellow") {
+                        return "🟨";
+                    } else if (item.color === "black") {
+                        return "⬛";
+                    } else {
+                        return "⬜";
+                    }
+                })
+                .join("");
+        }).join("\n");
+    };
+
+    const handleShare = async (numberOfGuesses: number, pattern: string) => {
+        const shareData = {
+            title: 'Voweldle',
+            text: `Voweldle in ${numberOfGuesses} attempts.\n\n${pattern}\n`,
+            url: 'https://voweldle.github.io',
+        }
+
+        try {
+            await navigator.share(shareData)
+        } catch (err) {
+            console.error('Sharing failed', err);
+            if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+                    autoDisappearingDialogBoxMessage.current = COPIED_TO_CLIPBOARD_MESSAGE;
+                    setShowAutoDisappearingDialog(true);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            } else {
+                console.log('Clipboard API not available');
+            }
+        }
+    }
+
     return (
 
         <div>
-            <div className="top-bar">
-                <h1>
-                    <span>V</span>
-                    <span>O</span>
-                    <span>W</span>
-                    <span>E</span>
-                    <span>L</span>
-                    <span>D</span>
-                    <span>L</span>
-                    <span>E</span>
-                </h1>
-            </div>
+            <Head>
+                <title>Voweldle</title>
+                <meta name="keywords" content="voweldle, word game, word puzzle, word search, word search game, word search puzzle, word puzzle game, word puzzle, word puzzle game, word" />
+                <meta name="description" content="Voweldle is a word game where you have to guess the word by filling in the consonants. It is a fun and challenging word puzzle game." />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
 
             <div className="game-container">
                 <div className="box-container" ref={boxContainerRef} style={{ marginTop: "5.5rem" }}>
@@ -586,17 +647,31 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
             </div>
 
             <div className="dialog-box-wrapper">
-                <AutoDisappearingDialogBox message="Too few letters!" timeout={1000} />
+                <AutoDisappearingDialogBox message={autoDisappearingDialogBoxMessage.current} timeout={1000} />
 
                 {showWinDialog && (
-                    <div className="win-dialog-box">
-                        <div className="message">
-                            <button className="close-button" onClick={handleCloseWinDialog}>✕</button> {/* add close button */}
-                            <p>You Win! Attempts: {attempts}</p>
-                        </div>
+                    <div className="modal-container">
+                        <Modal title={
+                            <><br />
+                                <CheckCircleOutlined style={{ color: '#45a049;', marginRight: '8px' }} />
+                                You Win! Attempts: <span style={{ color: '#45a049;' }}>{attempts}</span>
+                            </>
+                        }
+                            footer={null}
+                            open={true}
+                            width={250}
+                            onCancel={handleCloseWinDialog}
+                            style={{ top: "30%" }}
+
+                        >
+
+                            <div className="share-button-parent">
+                                <button className="share-button" onClick={() => handleShare(attempts, rowsToText(rows))}>Share</button>
+                            </div>
+                        </Modal>
                     </div>
                 )}
-            </div>
+            </div >
         </div >
     );
 };
