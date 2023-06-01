@@ -610,7 +610,7 @@ export default function SimpleKeyboard(props: KeyboardComponentProps) {
     const handleShare = async (numberOfGuesses: number, pattern: string) => {
         const shareData = {
             title: 'Voweldle',
-            text: `Voweldle in ${numberOfGuesses} attempts.\n\n${pattern}`,
+            text: `Voweldle in ${numberOfGuesses} attempts.\n\n${pattern}\n`,
             url: 'https://voweldle.github.io',
         }
 
