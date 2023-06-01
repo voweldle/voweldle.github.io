@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[157],{7257:function(n,_,u){(window.__NEXT_P=window.__NEXT_P||[]).push(["/Game",function(){return u(8111)}])}},function(n){n.O(0,[680,33,967,774,888,179],function(){return n(n.s=7257)}),_N_E=n.O()}]);
