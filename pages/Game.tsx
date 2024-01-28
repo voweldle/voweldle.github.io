@@ -254,13 +254,18 @@ export default function Game(props: KeyboardComponentProps) {
         newRow.forEach((item) => {
             // 1. if the letter is a vowel do nothing
             // 2. if the letter color was previously green, do nothing
-            // 3. if the letter color was previously red, do nothing
+            // 3. if the letter color was previously red but is now green/yellow,
+            //    set it to green/yellow. This can happen if you type a letter twice
+            //    in a word and one of the occurences is red but other is green/yellow
+            //    then we want to display as green/yellow on keyboard not red 
             // 4. if the letter color was previously yellow but is now green,
             //    change it to green
             // 5. if the letter color was previously none, set to current color
             if (!isVowel(item.letter)) {
                 if (newKeyColors[item.letter] === "yellow" && item.color === "green") {
                     newKeyColors[item.letter] = "green";
+                } else if (newKeyColors[item.letter] === "red") {
+                    newKeyColors[item.letter] = item.color;
                 } else if (newKeyColors[item.letter] === "none") {
                     newKeyColors[item.letter] = item.color;
                 }
