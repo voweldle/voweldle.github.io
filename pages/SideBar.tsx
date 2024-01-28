@@ -115,7 +115,7 @@ export default function SideBar() {
                                     </div>
                                     <div className="instruction_word_guess_desc_row">
                                         <div className="instruction_word_guess_desc_box" style={{ backgroundColor: "var(--color-green)", color: "white" }}>Y</div>
-                                        <p>Green means the letter is present at in the answer at this position.</p>
+                                        <p>Green means the letter is present in the answer at this position.</p>
                                     </div>
                                 </div>
 
